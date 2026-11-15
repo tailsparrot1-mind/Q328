@@ -38,3 +38,9 @@ No API keys, tokens, webhook secrets, encryption keys, session files or service-
 
 ## Supabase source snapshot added to Q328
 The deployed source of `taplink-payment-webhook` (version 9) and `activate-vkus-license` (version 1) was retrieved from the existing Frankfurt project and committed under `infrastructure/supabase/functions/`. A read-only technical state capture, including all 11 applied migration identifiers, table inventory, RLS state and environment-variable names, is under `infrastructure/supabase/PROJECT_STATE.md`. No secret values or database rows were exported, and no database operation was performed.
+
+## 3.28 artifact import into Q328
+- Imported files: `recovered-builds/3.28/Vkus_3.28_NO_SPLASH.zip`, `recovered-builds/3.28/Vkus_3.28_LAUNCH.png`, `recovered-builds/3.28/SHA256SUMS.txt`, and `recovered-builds/3.28/ARTIFACT_SOURCE.txt`.
+- Import workflow run: `43735569619` — completed successfully; download, file-presence checks, SHA-256 verification and commit steps all passed.
+- Q328 import commit: `29e9f70eed53ad798e5e91ce2d993bba7dd030b8` (`Import verified Vkus 3.28 build and launch evidence`).
+- The import bootstrap was replaced afterward with a manual verification-only workflow; no temporary signed download URL remains in the repository.
