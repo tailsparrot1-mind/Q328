@@ -57,10 +57,24 @@ jobs:
           time.sleep(1)
           ImageGrab.grab().save("screenshots/Vkus_3.28_Birzha.png")
           from vkus.exchange_marketplace import open_cloud_marketplace_window
-          open_cloud_marketplace_window(app.root)
+          board = open_cloud_marketplace_window(app.root)
           app.root.update()
           time.sleep(1)
-          ImageGrab.grab().save("screenshots/Vkus_3.28_Marketplace_Board.png")
+          ImageGrab.grab().save("screenshots/Vkus_3.28_Marketplace_Empty.png")
+          board.destroy()
+          SupabaseMarketplaceClient.list_listings = lambda self, **kwargs: [{
+              "id": "demo-card-1", "kind": "Ищу", "category": "Услуги",
+              "title": "ДЕМО · Ищу мастера по ремонту ноутбука",
+              "description": "Демонстрационная карточка интерфейса. Это не опубликованное объявление.",
+              "city": "Орск", "price": "1500", "currency": "RUB",
+              "created_at": "2026-11-15T18:00:00", "owner_id": "demo",
+              "contact": ""
+          }]
+          board = open_cloud_marketplace_window(app.root)
+          app.root.update()
+          time.sleep(1)
+          ImageGrab.grab().save("screenshots/Vkus_3.28_Marketplace_Card_DEMO.png")
+          board.destroy()
           app.root.destroy()
           PY
       - name: Validate candidate archive and checksum
