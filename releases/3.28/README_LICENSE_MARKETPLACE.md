@@ -4,7 +4,7 @@ This is the continuation checkpoint for the Vkus 3.28 desktop build.
 
 ## Build delivered
 - Archive: `Vkus_3.28_License_and_Marketplace.zip`
-- SHA-256: `770b723cb45bef28ed1c90c3f30d52373b282af4cf9de42c969c7ab11ac1fb3e`
+- SHA-256: `58b8920139ec3645836e873080af94a7d4b150336c68d86307593a51cdcf4451`
 - Base candidate: GitHub Actions run 43752802702, artifact 14176793865 (`Vkus-3.28-Marketplace-Candidate`).
 - Base source branch: `feature/vkus-328-marketplace-board`.
 
