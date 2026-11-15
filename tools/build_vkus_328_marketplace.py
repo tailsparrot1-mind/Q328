@@ -22,8 +22,8 @@ def download_url(url: str) -> bytes:
     req = urllib.request.Request(url, headers={"User-Agent":"Vkus-328-build"})
     with urllib.request.urlopen(req, timeout=45) as response:
         data = response.read()
-        if not data.startswith(b"\xff\xd8"):
-            raise SystemExit("Marketplace role-gate image URL did not return JPEG bytes.")
+        if not data.startswith(bytes.fromhex("89504e470d0a1a0a")):
+            raise SystemExit("Marketplace role-gate image URL did not return PNG bytes.")
         return data
 
 def main():
@@ -253,22 +253,22 @@ def main():
     gate.place(in_=shell, x=0, y=0, relwidth=1, relheight=1)
     gate_canvas = tk.Canvas(gate, bg="#030817", highlightthickness=0, bd=0)
     gate_canvas.place(relwidth=1, relheight=1)
-    gate_image_path = Path(__file__).resolve().parent / "assets" / "marketplace_role_gate.jpg"
+    gate_image_path = Path(__file__).resolve().parent / "assets" / "marketplace_role_gate.png"
     from PIL import Image, ImageTk
     gate_source = Image.open(gate_image_path).convert("RGB")
     gate_layout = {"left": None, "right": None}
     gate_canvas._photo = None
     def redraw_role_gate(_event=None):
         cw, ch = max(1, gate_canvas.winfo_width()), max(1, gate_canvas.winfo_height())
-        scale = min(cw / 1293, ch / 959)
-        iw, ih = max(1, int(1293*scale)), max(1, int(959*scale))
+        scale = min(cw / 1683, ch / 959)
+        iw, ih = max(1, int(1683*scale)), max(1, int(959*scale))
         resized = gate_source.resize((iw, ih), Image.Resampling.LANCZOS)
         gate_canvas._photo = ImageTk.PhotoImage(resized)
         gate_canvas.delete("all")
         ox, oy = (cw-iw)//2, (ch-ih)//2
         gate_canvas.create_image(ox, oy, image=gate_canvas._photo, anchor="nw")
-        gate_layout["left"] = (ox+90*scale, oy+638*scale, ox+603*scale, oy+733*scale)
-        gate_layout["right"] = (ox+696*scale, oy+638*scale, ox+1215*scale, oy+733*scale)
+        gate_layout["left"] = (ox+285*scale, oy+638*scale, ox+798*scale, oy+733*scale)
+        gate_layout["right"] = (ox+891*scale, oy+638*scale, ox+1410*scale, oy+733*scale)
     def finish_gate_auth(dialog):
         update_account_label()
         gate.place_forget()
@@ -421,7 +421,7 @@ def main():
     cloud = cloud.replace(old_signup, new_signup, 1)
     files["vkus/cloud_marketplace.py"] = cloud.encode("utf-8")
 
-    files["vkus/assets/marketplace_role_gate.jpg"] = download_url("https://at.adobe.com/KkJ45rxWQscEiqbr")
+    files["vkus/assets/marketplace_role_gate.png"] = download_url("https://photoshop-api.adobe.io/v2/short-url/urn:aaid:ps:US:93d3cf87-2e0b-4134-a343-80c7ec89f728")
     files["vkus/exchange_marketplace.py"] = board.encode("utf-8")
     req = files.get("requirements.txt", b"").decode("utf-8")
     if "keyring" not in req:
