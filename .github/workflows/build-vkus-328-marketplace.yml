@@ -7,7 +7,7 @@ on:
       - 'tools/build_vkus_328_marketplace.py'
       - '.github/workflows/build-vkus-328-marketplace.yml'
   push:
-    branches: [feature/vkus-328-marketplace-board]
+    branches: [feature/vkus-328-marketplace-board, baseline/vkus-3.28-license-marketplace]
     paths:
       - 'tools/build_vkus_328_marketplace.py'
       - '.github/workflows/build-vkus-328-marketplace.yml'
@@ -30,12 +30,12 @@ jobs:
       - name: Compile all Python modules
         run: |
           mkdir -p /tmp/vkus-candidate
-          unzip -q artifacts/Vkus_3.28_Marketplace_Candidate.zip -d /tmp/vkus-candidate
+          unzip -q artifacts/Vkus_3.28_License_and_Marketplace.zip -d /tmp/vkus-candidate
           python -m compileall -q /tmp/vkus-candidate
       - name: Run cloud marketplace unit tests (network mocked)
         run: |
           cd /tmp/vkus-candidate
-          python -m unittest tests/test_cloud_marketplace.py -v
+          python -m unittest tests/test_cloud_marketplace.py tests/test_integration_entrypoints.py -v
       - name: Launch Vkus and capture real UI screenshots under Xvfb
         run: |
           cd /tmp/vkus-candidate
@@ -86,19 +86,22 @@ jobs:
           gate_canvas = board._marketplace_gate_canvas
           regions = board._marketplace_gate_layout
           gate_canvas.update_idletasks()
-          # A click in the card body but outside its visible register button must do nothing.
-          left = regions["left"]
+          assert set(regions) == {"Соискатель", "Рекламодатель"}, "Role hitboxes do not match the visible role cards"
+          # A click outside the visible cards must not activate either role.
+          left = regions["Соискатель"]
           gate_canvas.event_generate("<Button-1>", x=int((left[0]+left[2])/2), y=int(left[1]-18))
           app.root.update()
-          assert not [w for w in board.winfo_children() if isinstance(w, tk.Toplevel)], "Click outside the visible registration button unexpectedly activated a role"
-          # Both exact visible button hitboxes must open their own registration flow.
-          for side, expected_title in (("left", "Vkus — Соискатель"), ("right", "Vkus — Рекламодатель")):
-              bounds = regions[side]
+          assert board._marketplace_gate_state["page"] == "role", "An outside click activated a role"
+          # Both visible cards must open their matching registration flow in the same full-screen gate.
+          for role, screenshot_name in (("Соискатель", "Registration_Seeker.png"), ("Рекламодатель", "Registration_Advertiser.png")):
+              bounds = regions[role]
               gate_canvas.event_generate("<Button-1>", x=int((bounds[0]+bounds[2])/2), y=int((bounds[1]+bounds[3])/2))
               app.root.update()
-              dialogs = [w for w in board.winfo_children() if isinstance(w, tk.Toplevel)]
-              assert dialogs and dialogs[-1].title() == expected_title, f"{side} button did not open the expected role registration dialog"
-              dialogs[-1].destroy()
+              assert board._marketplace_gate_state["page"] == "register", f"{role} card did not open registration"
+              assert board._marketplace_selected_role["value"] == role, f"Wrong role selected for {role}"
+              time.sleep(0.3)
+              ImageGrab.grab().save("screenshots/" + screenshot_name)
+              board._marketplace_show_role_screen()
               app.root.update()
           board.destroy()
           app.root.update()
@@ -125,14 +128,31 @@ jobs:
           PY
       - name: Validate candidate archive and checksum
         run: |
-          unzip -t artifacts/Vkus_3.28_Marketplace_Candidate.zip
+          unzip -t artifacts/Vkus_3.28_License_and_Marketplace.zip
           cd artifacts
           sha256sum -c SHA256SUMS.txt
+      - name: Publish durable GitHub release for the baseline
+        if: github.event_name == 'push' && github.ref == 'refs/heads/baseline/vkus-3.28-license-marketplace'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: vkus-3.28-license-marketplace-baseline
+          name: Vkus 3.28 — License Store + Marketplace baseline
+          target_commitish: ${{ github.sha }}
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
+          files: |
+            artifacts/Vkus_3.28_License_and_Marketplace.zip
+            artifacts/SHA256SUMS.txt
+            artifacts/BUILD_NOTES.md
+            /tmp/vkus-candidate/screenshots/*.png
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/upload-artifact@v4
         with:
-          name: Vkus-3.28-Marketplace-Candidate
+          name: Vkus-3.28-License-and-Marketplace-Baseline
           path: |
-            artifacts/Vkus_3.28_Marketplace_Candidate.zip
+            artifacts/Vkus_3.28_License_and_Marketplace.zip
             artifacts/SHA256SUMS.txt
             artifacts/BUILD_NOTES.md
             /tmp/vkus-candidate/screenshots/*.png

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build a separate Vkus 3.28 marketplace candidate from the immutable release ZIP."""
 from __future__ import annotations
-import hashlib, io, urllib.request, zipfile
+import hashlib, io, subprocess, tarfile, tempfile, urllib.request, zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -426,16 +426,54 @@ def main():
     req = files.get("requirements.txt", b"").decode("utf-8")
     if "keyring" not in req:
         files["requirements.txt"] = (req.rstrip() + "\nkeyring>=25.2\n").encode("utf-8")
+
+    # Apply the verified final integration patch: license-store entry + exact Marketplace role gate.
+    patch_archive = ROOT / "recovered-builds/3.28/Vkus_3.28_License_and_Marketplace_PATCH.tar.gz"
+    if not patch_archive.is_file():
+        raise SystemExit(f"Missing final integration patch: {patch_archive}")
+    patch_bytes = None
+    with tarfile.open(patch_archive, "r:gz") as patch_tar:
+        for member in patch_tar.getmembers():
+            if not member.isfile():
+                continue
+            stream = patch_tar.extractfile(member)
+            if stream is None:
+                continue
+            name = Path(member.name).as_posix().lstrip("./")
+            data = stream.read()
+            if name == "integration.patch":
+                patch_bytes = data
+            else:
+                files[name] = data
+    if patch_bytes is None:
+        raise SystemExit("Integration patch is missing integration.patch.")
+    patched_paths = ("vkus/app.py", "vkus/exchange_marketplace.py", "vkus/__init__.py")
+    with tempfile.TemporaryDirectory(prefix="vkus-328-final-") as temp_dir:
+        temp_root = Path(temp_dir)
+        for name in patched_paths:
+            target = temp_root / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(files[name])
+        subprocess.run(
+            ["patch", "-p1", "--forward", "--batch"],
+            cwd=temp_root,
+            input=patch_bytes,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
+        for name in patched_paths:
+            files[name] = (temp_root / name).read_bytes()
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
         for name, data in sorted(files.items()):
             z.writestr(name, data)
-    candidate = OUT / "Vkus_3.28_Marketplace_Candidate.zip"
+    candidate = OUT / "Vkus_3.28_License_and_Marketplace.zip"
     candidate.write_bytes(buf.getvalue())
     sha = hashlib.sha256(candidate.read_bytes()).hexdigest()
     (OUT / "SHA256SUMS.txt").write_text(f"{sha}  {candidate.name}\n", encoding="utf-8")
     (OUT / "BUILD_NOTES.md").write_text(
-        "# Vkus 3.28 — Marketplace candidate\n\n"
+        "## Vkus 3.28 — License Store + Marketplace baseline\n\n"
         "- Base: immutable recovered-builds/3.28/Vkus_3.28_NO_SPLASH.zip.\n"
         "- Added Supabase client and card-based noticeboard UI from pinned source commit dd5fd5ea.\n"
         "- Added a dedicated \"Доска объявлений\" button inside the existing Birzha search panel.\n"
