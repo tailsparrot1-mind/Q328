@@ -42,6 +42,28 @@ def main():
             raise SystemExit("Could not locate known Exchange click handler in Vkus 3.28; refusing a fuzzy patch.")
         app = app.replace(marker, hook + marker, 1)
         files[app_path] = app.encode("utf-8")
+    # The noticeboard source is expected to render listing cards, not a Treeview table.
+    board_path = "vkus/exchange_marketplace.py"
+    board = files[board_path].decode("utf-8")
+    if "cards_canvas" not in board or "ДОСКА ОБЪЯВЛЕНИЙ" not in board:
+        raise SystemExit("Pinned marketplace source is not the card-based noticeboard revision.")
+    style_anchor = '    style.map("CloudMarket.Treeview", background=[("selected", "#4b258b")])\n'
+    style_patch = (
+        '    style.configure("TCombobox", fieldbackground="#0a1731", background="#17264a",\n'
+        '                    foreground="#eaf1ff", arrowcolor="#c99aff", bordercolor="#304b80",\n'
+        '                    lightcolor="#304b80", darkcolor="#304b80", font=("DejaVu Sans", 9))\n'
+        '    style.map("TCombobox", fieldbackground=[("readonly", "#0a1731")],\n'
+        '              foreground=[("readonly", "#eaf1ff")],\n'
+        '              selectbackground=[("readonly", "#0a1731")],\n'
+        '              selectforeground=[("readonly", "#eaf1ff")],\n'
+        '              background=[("readonly", "#17264a")])\n'
+    )
+    if style_patch not in board:
+        if style_anchor not in board:
+            raise SystemExit("Could not locate noticeboard style anchor.")
+        board = board.replace(style_anchor, style_anchor + style_patch, 1)
+    files[board_path] = board.encode("utf-8")
+
     visual_path = "vkus/exchange_visual.py"
     visual = files[visual_path].decode("utf-8")
     old_button = (
