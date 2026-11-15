@@ -4,8 +4,6 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths:
-      - '.github/workflows/import-vkus-328-artifact.yml'
 
 permissions:
   contents: write
