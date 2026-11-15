@@ -42,6 +42,25 @@ def main():
             raise SystemExit("Could not locate known Exchange click handler in Vkus 3.28; refusing a fuzzy patch.")
         app = app.replace(marker, hook + marker, 1)
         files[app_path] = app.encode("utf-8")
+    visual_path = "vkus/exchange_visual.py"
+    visual = files[visual_path].decode("utf-8")
+    old_button = (
+        '    label(1137, 402, "Расширенный поиск  ⌄", 15, "#38aaff",\n'
+        '          width=190, fit=True)'
+    )
+    new_button = (
+        '    rounded(1095, 382, 1328, 426, "#21104d", "#9c35ff", 11, 1)\n'
+        '    label(1211, 390, "Доска объявлений", 11, "#f2dfff", "bold", "center", width=215, fit=True)\n'
+        '    label(1211, 407, "Ищу  ·  Предлагаю", 8, "#c7b0ef", "normal", "center", width=210, fit=True)'
+    )
+    if old_button not in visual:
+        raise SystemExit("Could not locate the existing advanced-search label; refusing an uncertain visual patch.")
+    visual = visual.replace(old_button, new_button, 1)
+    visual = visual.replace('"VKUS 3.27"', '"VKUS 3.28"', 1)
+    files[visual_path] = visual.encode("utf-8")
+    for target, source in FILES.items():
+        files[target] = download(source)
+
     # The noticeboard source is expected to render listing cards, not a Treeview table.
     board_path = "vkus/exchange_marketplace.py"
     board = files[board_path].decode("utf-8")
@@ -64,24 +83,6 @@ def main():
         board = board.replace(style_anchor, style_anchor + style_patch, 1)
     files[board_path] = board.encode("utf-8")
 
-    visual_path = "vkus/exchange_visual.py"
-    visual = files[visual_path].decode("utf-8")
-    old_button = (
-        '    label(1137, 402, "Расширенный поиск  ⌄", 15, "#38aaff",\n'
-        '          width=190, fit=True)'
-    )
-    new_button = (
-        '    rounded(1095, 382, 1328, 426, "#21104d", "#9c35ff", 11, 1)\n'
-        '    label(1211, 390, "Доска объявлений", 11, "#f2dfff", "bold", "center", width=215, fit=True)\n'
-        '    label(1211, 407, "Ищу  ·  Предлагаю", 8, "#c7b0ef", "normal", "center", width=210, fit=True)'
-    )
-    if old_button not in visual:
-        raise SystemExit("Could not locate the existing advanced-search label; refusing an uncertain visual patch.")
-    visual = visual.replace(old_button, new_button, 1)
-    visual = visual.replace('"VKUS 3.27"', '"VKUS 3.28"', 1)
-    files[visual_path] = visual.encode("utf-8")
-    for target, source in FILES.items():
-        files[target] = download(source)
 
     # Visual refinement: make the board feel like a Vkus product surface,
     # not a default Tk utility window. Keep all existing marketplace actions.
