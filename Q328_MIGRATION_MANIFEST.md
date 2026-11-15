@@ -34,3 +34,7 @@ See `infrastructure/SUPABASE_AND_PAYMENTS.md`. Existing Frankfurt Supabase proje
 
 ## Security
 No API keys, tokens, webhook secrets, encryption keys, session files or service-role keys belong in this repository.
+
+
+## Supabase source snapshot added to Q328
+The deployed source of `taplink-payment-webhook` (version 9) and `activate-vkus-license` (version 1) was retrieved from the existing Frankfurt project and committed under `infrastructure/supabase/functions/`. A read-only technical state capture, including all 11 applied migration identifiers, table inventory, RLS state and environment-variable names, is under `infrastructure/supabase/PROJECT_STATE.md`. No secret values or database rows were exported, and no database operation was performed.
