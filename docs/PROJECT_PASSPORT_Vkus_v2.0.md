@@ -381,3 +381,19 @@ Workflow GitHub Pages настроен на публикацию папки `Vku
 
 В сообщении ассистента после просьбы запретить Fish был указан коммит `738f9f268e33bad2c6db76de122b2ab4d0c07bb7` и заявлено, что паспорт обновлён и перечитан. Проверка истории GitHub не нашла этот коммит. Текущая редакция паспорта всё ещё датирована 13.11.2026 и содержит старые указания, включая Fish. Поэтому прежнее заявление о сохранении/проверке было недостоверным; настоящий раздел фиксирует фактическое состояние и отменяет старое требование Fish.
 
+
+
+---
+
+## 15. Q328 — canonical consolidation repository (2026-11-15)
+
+The canonical continuation repository is https://github.com/tailsparrot1-mind/Q328.
+
+- The native app source is pinned as submodule `app-source` to `tailsparrot1-mind/vkus--3.17-button` commit `3afe7b837fe311d6d3252ffa0cab5af6e9f0ca32`.
+- The project passport and Store source are pinned as submodule `project-docs` to `tailsparrot1-mind/Vkus-Development` commit `4377c91ab7e8ab2e8e3941db2a73e5b031dad9b0`.
+- The cloud marketplace PR is preserved separately as submodule `cloud-marketplace-pr` at commit `6325c6e6edee9a05c729a68a719d5d0634d4bd8d`; it is not merged into the local-marketplace mainline.
+- The passport, Store HTML files, 3.28 report, infrastructure inventory and migration manifest are copied directly into Q328.
+- Clone all linked source trees with `git clone --recurse-submodules https://github.com/tailsparrot1-mind/Q328.git`.
+- The original 3.28 CI artifact is being imported through the Q328 workflow `.github/workflows/import-vkus-328-artifact.yml`; it must be run from GitHub Actions to materialize the ZIP and screenshot under `recovered-builds/3.28/`.
+
+No Supabase project, data, credentials or production secrets were copied or changed.
