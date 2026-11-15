@@ -29,3 +29,6 @@ The original 3.28 application ZIP, launch screenshot and checksum manifest have 
 ## Vkus 3.28 recovered build
 
 The imported application ZIP, launch screenshot, SHA-256 manifest and source provenance are stored in `recovered-builds/3.28/`. The workflow `.github/workflows/import-vkus-328-artifact.yml` is now verification-only: it checks that the files exist and that the ZIP checksum matches the manifest.
+
+## Vkus 3.28 — combined Store + Marketplace checkpoint
+The current continuation checkpoint is documented in [`releases/3.28/README_LICENSE_MARKETPLACE.md`](releases/3.28/README_LICENSE_MARKETPLACE.md). The combined local test archive is `Vkus_3.28_License_and_Marketplace.zip`; SHA-256 `770b723cb45bef28ed1c90c3f30d52373b282af4cf9de42c969c7ab11ac1fb3e`. This branch preserves the checkpoint metadata and verification scope. Continue Vkus work from this checkpoint rather than the older Store-only package.
