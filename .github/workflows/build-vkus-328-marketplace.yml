@@ -11,6 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Upload immutable original 3.28 source archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: vkus-328-original-source
+          path: |
+            recovered-builds/3.28/Vkus_3.28_NO_SPLASH.zip
+            recovered-builds/3.28/Vkus_3.28_LAUNCH.png
+            recovered-builds/3.28/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 7
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
