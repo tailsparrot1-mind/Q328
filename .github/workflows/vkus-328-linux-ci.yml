@@ -1,0 +1,116 @@
+name: Vkus 3.28 Linux compatibility
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "recovered-builds/3.28/Vkus_3.28_NO_SPLASH.zip"
+      - ".github/workflows/vkus-328-linux-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-and-smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout Q328
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Verify original archive without modifying it
+        run: |
+          set -euo pipefail
+          cd recovered-builds/3.28
+          expected="$(awk '{print $1}' SHA256SUMS.txt)"
+          actual="$(sha256sum Vkus_3.28_NO_SPLASH.zip | awk '{print $1}')"
+          test "$expected" = "$actual"
+          unzip -t Vkus_3.28_NO_SPLASH.zip
+          mkdir -p "$RUNNER_TEMP/vkus-328"
+          unzip -q Vkus_3.28_NO_SPLASH.zip -d "$RUNNER_TEMP/vkus-328"
+          echo "VKUS_ROOT=$RUNNER_TEMP/vkus-328" >> "$GITHUB_ENV"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: "**/requirements.txt"
+
+      - name: Install Linux GUI and browser test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb python3-tk libgtk-3-0 libdbus-glib-1-2 libasound2t64
+          python -m pip install --upgrade pip
+
+      - name: Locate application manifest
+        id: app
+        run: |
+          set -euo pipefail
+          root="$VKUS_ROOT"
+          req="$(find "$root" -name requirements.txt -type f -print -quit)"
+          main="$(find "$root" -name main.py -type f -print -quit)"
+          test -n "$main"
+          test -n "$req"
+          echo "root=$(dirname "$main")" >> "$GITHUB_OUTPUT"
+          echo "requirements=$req" >> "$GITHUB_OUTPUT"
+          echo "main=$main" >> "$GITHUB_OUTPUT"
+          echo "Application entrypoint: $main"
+          echo "Dependency manifest: $req"
+
+      - name: Install application dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install -r "${{ steps.app.outputs.requirements }}"
+
+      - name: Compile all Python modules
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import pathlib, py_compile, sys
+          root = pathlib.Path("${{ steps.app.outputs.root }}")
+          files = sorted(root.rglob("*.py"))
+          if not files:
+              raise SystemExit("No Python modules found")
+          failures = []
+          for path in files:
+              try:
+                  py_compile.compile(str(path), doraise=True)
+              except Exception as exc:
+                  failures.append((path, exc))
+          print(f"Compiled {len(files) - len(failures)}/{len(files)} Python files")
+          for path, exc in failures:
+              print(f"FAIL: {path}: {exc}")
+          if failures:
+              raise SystemExit(1)
+          PY
+
+      - name: Smoke-test Tkinter under virtual display
+        run: |
+          xvfb-run -a python - <<'PY'
+          import tkinter as tk
+          root = tk.Tk()
+          root.withdraw()
+          root.update_idletasks()
+          root.destroy()
+          print("Tkinter root creation/destruction: OK")
+          PY
+
+      - name: Smoke-test Selenium Firefox if available
+        continue-on-error: true
+        run: |
+          python - <<'PY'
+          from selenium import webdriver
+          from selenium.webdriver.firefox.options import Options
+          options = Options()
+          options.add_argument("-headless")
+          driver = webdriver.Firefox(options=options)
+          try:
+              driver.get("data:text/html,<title>VKUS-CI</title><p>browser-ok</p>")
+              assert driver.title == "VKUS-CI"
+              print("Firefox + Selenium headless smoke test: OK")
+          finally:
+              driver.quit()
+          PY
