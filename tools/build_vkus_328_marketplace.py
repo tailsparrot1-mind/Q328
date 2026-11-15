@@ -32,10 +32,10 @@ def main():
     app = files[app_path].decode("utf-8")
     marker = "        if 1360 <= x <= 1618 and 373 <= y <= 700:\n"
     hook = (
-        "        if 1095 <= x <= 1328 and 382 <= y <= 426:\\n"
-        "            from .exchange_marketplace import open_cloud_marketplace_window\\n"
-        "            open_cloud_marketplace_window(self.root)\\n"
-        "            return\\n"
+        "        if 1095 <= x <= 1328 and 382 <= y <= 426:\n"
+        "            from .exchange_marketplace import open_cloud_marketplace_window\n"
+        "            open_cloud_marketplace_window(self.root)\n"
+        "            return\n"
     )
     if "open_cloud_marketplace_window(self.root)" not in app:
         if marker not in app:
