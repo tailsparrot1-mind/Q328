@@ -1,0 +1,44 @@
+name: Transfer Vkus 3.28 source archive
+
+on:
+  push:
+    branches:
+      - work/zip-artifact-transfer
+    paths:
+      - .github/workflows/transfer-vkus-328.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  package-source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: work/zip-artifact-transfer
+      - name: Verify source archive and checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd recovered-builds/3.28
+          test -s Vkus_3.28_NO_SPLASH.zip
+          test -s Vkus_3.28_LAUNCH.png
+          test -s SHA256SUMS.txt
+          expected="$(awk 'NR==1 {print $1}' SHA256SUMS.txt)"
+          actual="$(sha256sum Vkus_3.28_NO_SPLASH.zip | awk '{print $1}')"
+          test "$expected" = "$actual"
+          unzip -t Vkus_3.28_NO_SPLASH.zip
+      - name: Upload source archive and launch evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: vkus-328-source-transfer
+          path: |
+            recovered-builds/3.28/Vkus_3.28_NO_SPLASH.zip
+            recovered-builds/3.28/Vkus_3.28_LAUNCH.png
+            recovered-builds/3.28/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 7
