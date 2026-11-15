@@ -45,12 +45,12 @@ def main():
     visual_path = "vkus/exchange_visual.py"
     visual = files[visual_path].decode("utf-8")
     old_button = (
-        '    label(1137, 402, "Расширенный поиск  ⌄", 15, "#38aaff",\\n'
+        '    label(1137, 402, "Расширенный поиск  ⌄", 15, "#38aaff",\n'
         '          width=190, fit=True)'
     )
     new_button = (
-        '    rounded(1095, 382, 1328, 426, "#21104d", "#9c35ff", 11, 1)\\n'
-        '    label(1211, 390, "Доска объявлений", 11, "#f2dfff", "bold", "center", width=215, fit=True)\\n'
+        '    rounded(1095, 382, 1328, 426, "#21104d", "#9c35ff", 11, 1)\n'
+        '    label(1211, 390, "Доска объявлений", 11, "#f2dfff", "bold", "center", width=215, fit=True)\n'
         '    label(1211, 407, "Ищу  ·  Предлагаю", 8, "#c7b0ef", "normal", "center", width=210, fit=True)'
     )
     if old_button not in visual:
