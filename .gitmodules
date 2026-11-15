@@ -1,0 +1,9 @@
+[submodule "app-source"]
+	path = app-source
+	url = https://github.com/tailsparrot1-mind/vkus--3.17-button.git
+[submodule "project-docs"]
+	path = project-docs
+	url = https://github.com/tailsparrot1-mind/Vkus-Development.git
+[submodule "cloud-marketplace-pr"]
+	path = cloud-marketplace-pr
+	url = https://github.com/tailsparrot1-mind/vkus--3.17-button.git
