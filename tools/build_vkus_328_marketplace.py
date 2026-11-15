@@ -132,6 +132,58 @@ def main():
     # Keep the card grid visually balanced at every result count.
     if 'card.configure(width=780, height=178)' not in board:
         raise SystemExit("Centered single-card layout was not applied.")
+
+    # Second visual pass: richer listing hierarchy and distinct demand/supply cues.
+    card_start = board.index('            top = tk.Frame(card, bg="#101f43")')
+    card_end = board.index('            def choose(', card_start)
+    card_ui = '''            # Slim neon rail makes each listing instantly scannable.
+            stripe = tk.Frame(card, bg=accent, width=4)
+            stripe.place(x=0, y=0, relheight=1)
+            top = tk.Frame(card, bg="#101f43")
+            top.pack(fill="x", padx=(5, 0))
+            badge_bg = "#2b1555" if kind == "Ищу" else "#103c55"
+            badge_text = "ИЩУ" if kind == "Ищу" else "ПРЕДЛАГАЮ"
+            tk.Label(top, text=badge_text, bg=badge_bg, fg=accent,
+                     font=("DejaVu Sans", 8, "bold"),
+                     padx=12, pady=5).pack(side="left")
+            created = (item.get("created_at") or "")[:10]
+            tk.Label(top, text=f"ОПУБЛИКОВАНО  {created or '—'}",
+                     bg="#101f43", fg="#8098c6",
+                     font=("DejaVu Sans", 7, "bold")).pack(side="right", padx=(4, 2))
+            tk.Label(card, text=item.get("title") or "Без заголовка",
+                     bg="#101f43", fg="#f6f3ff",
+                     font=("DejaVu Sans", 14, "bold"),
+                     anchor="w", justify="left", wraplength=690).pack(
+                         fill="x", padx=(5, 0), pady=(13, 6))
+            summary = (item.get("description") or "").replace("\\n", " ").strip()
+            if len(summary) > 220:
+                summary = summary[:217] + "…"
+            tk.Label(card, text=summary or "Автор пока не добавил описание.",
+                     bg="#101f43", fg="#b8c7e6",
+                     font=("DejaVu Sans", 9), anchor="w", justify="left",
+                     wraplength=690).pack(fill="x", padx=(5, 0), pady=(0, 14))
+            meta_row = tk.Frame(card, bg="#101f43")
+            meta_row.pack(fill="x", padx=(5, 0))
+            def meta_chip(caption, value, color="#d8c5ff", fill="#1a2c53"):
+                tk.Label(meta_row, text=f"{caption}  {value}", bg=fill, fg=color,
+                         font=("DejaVu Sans", 8, "bold"),
+                         padx=10, pady=6).pack(side="left", padx=(0, 8))
+            meta_chip("КАТЕГОРИЯ", item.get("category") or "Другое")
+            meta_chip("ГОРОД", f"⌖ {item.get('city') or 'Не указан'}", "#b9d8ff", "#142b50")
+            if item.get("price") not in (None, ""):
+                price = f"{item.get('price')} {item.get('currency') or 'RUB'}"
+                meta_chip("БЮДЖЕТ" if kind == "Ищу" else "ЦЕНА", price,
+                          "#83f0df" if kind == "Ищу" else "#8be7ff",
+                          "#103b4a" if kind == "Ищу" else "#10354b")
+            status_text = item.get("status") or "Активно"
+            tk.Label(meta_row, text=status_text.upper(), bg="#101f43",
+                     fg="#6fe0b4" if status_text == "Активно" else "#a2b0ce",
+                     font=("DejaVu Sans", 7, "bold")).pack(side="right", padx=(4, 2))
+'''
+    board = board[:card_start] + card_ui + board[card_end:]
+    board = board.replace('card.configure(width=780, height=178)', 'card.configure(width=780, height=220)', 1)
+    board = board.replace('wraplength=760, justify="center").pack(pady=(0, 22))',
+        'wraplength=760, justify="center").pack(pady=(0, 18))', 1)
     files["vkus/exchange_marketplace.py"] = board.encode("utf-8")
     req = files.get("requirements.txt", b"").decode("utf-8")
     if "keyring" not in req:
