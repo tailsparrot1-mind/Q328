@@ -282,7 +282,7 @@ def main():
                            fill="#b6a0e8", font=("DejaVu Sans", 8, "bold"))
     gate_content = tk.Frame(gate, bg="#08152f", highlightbackground="#344d82",
                             highlightthickness=1, padx=34, pady=26)
-    gate_content.place(relx=(238 + window_width) / (2 * window_width), rely=0.49, anchor="center", width=max(980, window_width - 280), height=700)
+    gate_content.place(relx=(238 + window_width) / (2 * window_width), rely=0.49, anchor="center", width=max(980, window_width - 380), height=700)
     tk.Label(gate_content, text="VKUS  /  MARKETPLACE", bg="#08152f",
              fg="#8da8df", font=("DejaVu Sans", 9, "bold")).pack(pady=(2, 10))
     tk.Label(gate_content, text="ДОСКА ОБЪЯВЛЕНИЙ", bg="#08152f",
