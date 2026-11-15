@@ -2,6 +2,10 @@ name: Import Vkus 3.28 artifact
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/import-vkus-328-artifact.yml'
 
 permissions:
   contents: write
@@ -36,8 +40,8 @@ jobs:
           cp /tmp/vkus-328-artifact/Vkus_3.28_LAUNCH.png recovered-builds/3.28/
           cp /tmp/vkus-328-artifact/SHA256SUMS.txt recovered-builds/3.28/
           printf 'Imported from workflow run 43623882237 / artifact 14124759940.\n' > recovered-builds/3.28/ARTIFACT_SOURCE.txt
-          cd recovered-builds/3.28
-          sha256sum -c SHA256SUMS.txt
+          expected="$(awk '{print $1}' /tmp/vkus-328-artifact/SHA256SUMS.txt)"
+          printf '%s  %s\n' "$expected" "recovered-builds/3.28/Vkus_3.28_NO_SPLASH.zip" | sha256sum -c -
 
       - name: Commit evidence into Q328
         run: |
