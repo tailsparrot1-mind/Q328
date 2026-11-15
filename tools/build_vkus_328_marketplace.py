@@ -18,6 +18,14 @@ def download(path: str) -> bytes:
     with urllib.request.urlopen(req, timeout=30) as response:
         return response.read()
 
+def download_url(url: str) -> bytes:
+    req = urllib.request.Request(url, headers={"User-Agent":"Vkus-328-build"})
+    with urllib.request.urlopen(req, timeout=45) as response:
+        data = response.read()
+        if not data.startswith(b"\xff\xd8"):
+            raise SystemExit("Marketplace role-gate image URL did not return JPEG bytes.")
+        return data
+
 def main():
     if not OUTER.is_file():
         raise SystemExit(f"Missing immutable source archive: {OUTER}")
@@ -88,11 +96,11 @@ def main():
     # not a default Tk utility window. Keep all existing marketplace actions.
     board = files["vkus/exchange_marketplace.py"].decode("utf-8")
     visual_replacements = [
-        ('win.geometry("1180x760")', 'parent.update_idletasks()\n    window_width = max(1280, parent.winfo_width())\n    window_height = max(820, parent.winfo_height())\n    win.geometry(f"{window_width}x{window_height}+{parent.winfo_rootx()}+{parent.winfo_rooty()}")'),
-        ('win.minsize(960, 640)', 'win.minsize(1080, 720)'),
+        ('win.geometry("1180x760")', 'parent.update_idletasks()\n    screen_w, screen_h = win.winfo_screenwidth(), win.winfo_screenheight()\n    gate_ratio = 1293 / 959\n    window_width = min(1500, screen_w - 80, int((screen_h - 140) * gate_ratio))\n    window_height = int(window_width / gate_ratio)\n    win.geometry(f"{window_width}x{window_height}+{max(0,(screen_w-window_width)//2)}+{max(0,(screen_h-window_height-60)//2)}")'),
+        ('win.minsize(960, 640)', 'win.minsize(900, 667)'),
         ('win.configure(bg="#050b1b")', 'win.configure(bg="#030817")'),
         ('shell = tk.Frame(win, bg="#07122a", highlightbackground="#7136c3", highlightthickness=1)\n    shell.pack(fill="both", expand=True, padx=10, pady=10)',
-         'shell = tk.Frame(win, bg="#07132d", highlightbackground="#8548dc", highlightthickness=1)\n    shell.pack(fill="both", expand=True, padx=14, pady=14)'),
+         'shell = tk.Frame(win, bg="#07132d", highlightbackground="#8548dc", highlightthickness=1)\n    shell.pack(fill="both", expand=True, padx=0, pady=0)'),
         ('header.pack(fill="x", padx=18, pady=(15, 8))', 'header.pack(fill="x", padx=24, pady=(20, 14))'),
         ('text="ДОСКА ОБЪЯВЛЕНИЙ", bg="#07122a", fg="#d18aff",\n             font=("DejaVu Sans", 17, "bold")',
          'text="ДОСКА ОБЪЯВЛЕНИЙ", bg="#07122a", fg="#d9a0ff",\n             font=("DejaVu Sans", 21, "bold")'),
@@ -239,179 +247,110 @@ def main():
     # Full-window onboarding gate: the noticeboard remains covered until an account
     # has a persisted marketplace role (Соискатель or Рекламодатель).
     gate_anchor = '    for variable in (query_var, kind_var, category_var, city_var):\n'
-    gate_patch = '''    # Role selection + registration gate. The underlying board is not visible before auth.
+    gate_patch = '''    # Exact reference-image gate. The reference has been cropped to exclude the entire left navigation.
     auth_bar.pack_forget()
-    gate = tk.Frame(shell, bg="#050d22", highlightbackground="#8a4de0", highlightthickness=1)
+    gate = tk.Frame(shell, bg="#030817", highlightthickness=0, bd=0)
     gate.place(in_=shell, x=0, y=0, relwidth=1, relheight=1)
-    gate_canvas = tk.Canvas(gate, bg="#050d22", highlightthickness=0, bd=0)
+    gate_canvas = tk.Canvas(gate, bg="#030817", highlightthickness=0, bd=0)
     gate_canvas.place(relwidth=1, relheight=1)
-    try:
-        from PIL import Image, ImageTk
-        gate_bg_path = Path(__file__).resolve().parent / "assets" / "exchange_neon_background.png"
-        gate_bg = Image.open(gate_bg_path).resize((window_width, window_height), Image.Resampling.LANCZOS)
-        gate._bg_image = ImageTk.PhotoImage(gate_bg)
-        gate_canvas.create_image(0, 0, image=gate._bg_image, anchor="nw")
-    except Exception:
-        gate_canvas.configure(bg="#050d22")
-    gate_canvas.create_rectangle(0, 0, 238, window_height - 28, fill="#030918", outline="#6935a8", width=2)
-    gate_canvas.create_text(118, 72, text="Vkus", fill="#c38aff",
-                           font=("DejaVu Sans", 37, "bold"))
-    gate_canvas.create_text(118, 112, text="ПРОСТРАНСТВО ВОЗМОЖНОСТЕЙ",
-                           fill="#8199c9", font=("DejaVu Sans", 7, "bold"))
-    gate_canvas.create_rectangle(12, 390, 226, 438, fill="#24104e", outline="#a64dff", width=2)
-    nav_items = [("◉", "Сообщения", 286), ("⌕", "Поиск", 350),
-                 ("◇", "Биржа", 414), ("▥", "Мониторинг", 478),
-                 ("⚙", "Настройки", 542)]
-    for symbol, caption, y in nav_items:
-        color = "#f1dfff" if caption == "Биржа" else "#9db2dc"
-        gate_canvas.create_text(38, y, text=symbol, fill="#b978ff" if caption == "Биржа" else "#6e8bc5",
-                                font=("DejaVu Sans", 17, "bold"))
-        gate_canvas.create_text(66, y, text=caption, fill=color, anchor="w",
-                                font=("DejaVu Sans", 10, "bold" if caption == "Биржа" else "normal"))
-    gate_canvas.create_rectangle(18, window_height - 172, 220, window_height - 48, fill="#081a36", outline="#2767a2", width=1)
-    gate_canvas.create_text(34, window_height - 152, text="Ваш статус", fill="#9db7e2", anchor="w",
-                            font=("DejaVu Sans", 9))
-    gate_canvas.create_oval(34, window_height - 132, 47, window_height - 119, fill="#16e0ae", outline="")
-    gate_canvas.create_text(58, window_height - 126, text="Активен", fill="#27e7b2", anchor="w",
-                            font=("DejaVu Sans", 11, "bold"))
-    gate_canvas.create_text(34, window_height - 90, text="Премиум", fill="#ffcf65", anchor="w",
-                            font=("DejaVu Sans", 11, "bold"))
-    gate_canvas.create_text(34, window_height - 70, text="Vkus 3.28", fill="#8199c9", anchor="w",
-                            font=("DejaVu Sans", 8))
-    gate_canvas.create_text((238 + window_width) / 2, window_height - 54, text="VKUS  ·  ВОЗМОЖНОСТИ НАХОДЯТ ДРУГ ДРУГА",
-                           fill="#b6a0e8", font=("DejaVu Sans", 8, "bold"))
-    gate_content = tk.Frame(gate, bg="#08152f", highlightbackground="#344d82",
-                            highlightthickness=1, padx=34, pady=26)
-    gate_content.place(relx=(238 + window_width) / (2 * window_width), rely=0.49, anchor="center", width=max(980, window_width - 380), height=700)
-    tk.Label(gate_content, text="VKUS  /  MARKETPLACE", bg="#08152f",
-             fg="#8da8df", font=("DejaVu Sans", 9, "bold")).pack(pady=(2, 10))
-    tk.Label(gate_content, text="ДОСКА ОБЪЯВЛЕНИЙ", bg="#08152f",
-             fg="#f4f0ff", font=("DejaVu Sans", 22, "bold")).pack()
-    tk.Label(gate_content, text="Выберите свою роль и начните находить возможности в Vkus.",
-             bg="#08152f", fg="#a9badc", justify="center",
-             font=("DejaVu Sans", 10)).pack(pady=(10, 24))
-    selected_role = {"value": None}
-    role_cards = tk.Frame(gate_content, bg="#08152f")
-    role_cards.pack(fill="x", pady=(0, 12))
-    benefits = tk.Frame(gate_content, bg="#08152f")
-    benefits.pack(fill="x", pady=(0, 12))
-    for title, caption, accent in (
-        ("ЕДИНАЯ ПЛОЩАДКА", "Работа, услуги и задачи", "#c18aff"),
-        ("ПРЯМОЙ КОНТАКТ", "Общайтесь без посредников", "#42d8f5"),
-        ("ВАШ ВЫБОР", "Вы сами задаёте направление", "#72e5bd"),
-    ):
-        chip = tk.Frame(benefits, bg="#101f40", highlightbackground=accent,
-                        highlightthickness=1, padx=10, pady=8)
-        chip.pack(side="left", fill="x", expand=True, padx=4)
-        tk.Label(chip, text=title, bg="#101f40", fg=accent,
+    gate_image_path = Path(__file__).resolve().parent / "assets" / "marketplace_role_gate.jpg"
+    from PIL import Image, ImageTk
+    gate_source = Image.open(gate_image_path).convert("RGB")
+    gate_layout = {"left": None, "right": None}
+    gate_canvas._photo = None
+    def redraw_role_gate(_event=None):
+        cw, ch = max(1, gate_canvas.winfo_width()), max(1, gate_canvas.winfo_height())
+        scale = min(cw / 1293, ch / 959)
+        iw, ih = max(1, int(1293*scale)), max(1, int(959*scale))
+        resized = gate_source.resize((iw, ih), Image.Resampling.LANCZOS)
+        gate_canvas._photo = ImageTk.PhotoImage(resized)
+        gate_canvas.delete("all")
+        ox, oy = (cw-iw)//2, (ch-ih)//2
+        gate_canvas.create_image(ox, oy, image=gate_canvas._photo, anchor="nw")
+        gate_layout["left"] = (ox+90*scale, oy+638*scale, ox+603*scale, oy+733*scale)
+        gate_layout["right"] = (ox+696*scale, oy+638*scale, ox+1215*scale, oy+733*scale)
+    def finish_gate_auth(dialog):
+        update_account_label()
+        gate.place_forget()
+        dialog.destroy()
+        refresh()
+    def show_role_auth(role):
+        dialog = tk.Toplevel(win)
+        dialog.title("Vkus — " + role)
+        dialog.configure(bg="#08152f")
+        dialog.transient(win)
+        dialog.grab_set()
+        dialog.resizable(False, False)
+        dialog.geometry("470x330")
+        panel = tk.Frame(dialog, bg="#08152f", padx=28, pady=24)
+        panel.pack(fill="both", expand=True)
+        accent = "#d05aff" if role == "Соискатель" else "#23bfff"
+        tk.Label(panel, text="VKUS  /  ДОСКА ОБЪЯВЛЕНИЙ", bg="#08152f", fg=accent,
+                 font=("DejaVu Sans", 9, "bold")).pack(anchor="w")
+        tk.Label(panel, text=("Регистрация соискателя" if role == "Соискатель" else "Регистрация рекламодателя"),
+                 bg="#08152f", fg="#f4f0ff", font=("DejaVu Sans", 16, "bold")).pack(anchor="w", pady=(8,18))
+        tk.Label(panel, text="EMAIL", bg="#08152f", fg="#91a8d7",
                  font=("DejaVu Sans", 8, "bold")).pack(anchor="w")
-        tk.Label(chip, text=caption, bg="#101f40", fg="#a9badc",
-                 font=("DejaVu Sans", 8)).pack(anchor="w", pady=(3, 0))
-    def choose_gate_role(role):
-        selected_role["value"] = role
-        seeker.configure(bg="#39206b" if role == "Соискатель" else "#111f40",
-                         highlightbackground="#bb7aff" if role == "Соискатель" else "#344d82")
-        advertiser.configure(bg="#123e59" if role == "Рекламодатель" else "#111f40",
-                             highlightbackground="#36c9f1" if role == "Рекламодатель" else "#344d82")
-        role_hint.configure(text=("Выбрано: Соискатель · ищу работу и предлагаю свои навыки"
-                                  if role == "Соискатель" else
-                                  "Выбрано: Рекламодатель · ищу исполнителя для своей задачи"),
-                            fg="#d6c0ff" if role == "Соискатель" else "#9cecff")
-    seeker = tk.Frame(role_cards, bg="#111f40", highlightbackground="#344d82",
-                      highlightthickness=1, padx=20, pady=18, cursor="hand2")
-    seeker.pack(side="left", fill="both", expand=True, padx=(0, 10))
-    advertiser = tk.Frame(role_cards, bg="#111f40", highlightbackground="#344d82",
-                          highlightthickness=1, padx=20, pady=18, cursor="hand2")
-    advertiser.pack(side="left", fill="both", expand=True, padx=(10, 0))
-    tk.Label(seeker, text="↗", bg="#111f40", fg="#c78aff",
-             font=("DejaVu Sans", 27, "bold")).pack(anchor="w")
-    tk.Label(seeker, text="СОИСКАТЕЛЬ", bg="#111f40", fg="#ead8ff",
-             font=("DejaVu Sans", 14, "bold")).pack(anchor="w", pady=(5, 5))
-    tk.Label(seeker, text="Ищу работу  ·  Предлагаю услуги\\nПокажите, что умеете, и найдите заказчика.",
-             bg="#111f40", fg="#a9badc", justify="left",
-             font=("DejaVu Sans", 9)).pack(anchor="w")
-    tk.Label(advertiser, text="⌕", bg="#111f40", fg="#35c9ef",
-             font=("DejaVu Sans", 27, "bold")).pack(anchor="w")
-    tk.Label(advertiser, text="РЕКЛАМОДАТЕЛЬ", bg="#111f40", fg="#c5f4ff",
-             font=("DejaVu Sans", 14, "bold")).pack(anchor="w", pady=(5, 5))
-    tk.Label(advertiser, text="Ищу исполнителя  ·  Размещаю задачу\\nНайдите специалиста под свою потребность.",
-             bg="#111f40", fg="#a9badc", justify="left",
-             font=("DejaVu Sans", 9)).pack(anchor="w")
-    for widget in (seeker, *seeker.winfo_children()):
-        widget.bind("<Button-1>", lambda _e: choose_gate_role("Соискатель"))
-    for widget in (advertiser, *advertiser.winfo_children()):
-        widget.bind("<Button-1>", lambda _e: choose_gate_role("Рекламодатель"))
-    role_hint = tk.Label(gate_content, text="Сначала выберите, в каком качестве вы хотите пользоваться доской",
-                         bg="#08152f", fg="#8fa8d8", font=("DejaVu Sans", 8))
-    role_hint.pack(pady=(0, 15))
-    credentials = tk.Frame(gate_content, bg="#08152f")
-    credentials.pack(fill="x", padx=90)
-    tk.Label(credentials, text="EMAIL", bg="#08152f", fg="#91a8d7",
-             font=("DejaVu Sans", 8, "bold")).grid(row=0, column=0, sticky="w", pady=(0, 4))
-    gate_email = tk.Entry(credentials, textvariable=email_var, bg="#101f43", fg="#f4f6ff",
-                          insertbackground="white", relief="flat", bd=0,
-                          highlightthickness=1, highlightbackground="#344d82",
-                          font=("DejaVu Sans", 10))
-    gate_email.grid(row=1, column=0, sticky="ew", ipady=9, pady=(0, 12))
-    tk.Label(credentials, text="ПАРОЛЬ  ·  НЕ МЕНЕЕ 8 СИМВОЛОВ", bg="#08152f",
-             fg="#91a8d7", font=("DejaVu Sans", 8, "bold")).grid(row=2, column=0, sticky="w", pady=(0, 4))
-    gate_password = tk.Entry(credentials, textvariable=password_var, show="•",
-                              bg="#101f43", fg="#f4f6ff", insertbackground="white",
-                              relief="flat", bd=0, highlightthickness=1,
-                              highlightbackground="#344d82", font=("DejaVu Sans", 10))
-    gate_password.grid(row=3, column=0, sticky="ew", ipady=9)
-    credentials.grid_columnconfigure(0, weight=1)
-    gate_actions = tk.Frame(gate_content, bg="#08152f")
-    gate_actions.pack(fill="x", padx=90, pady=(16, 0))
-    def complete_gate_registration():
-        if not selected_role["value"]:
-            messagebox.showinfo("Выберите роль", "Сначала выберите Соискателя или Рекламодателя.", parent=win)
-            return
-        try:
-            client.sign_up(email_var.get(), password_var.get(), role=selected_role["value"])
-            if client.is_authenticated:
-                update_account_label()
-                gate.place_forget()
-                refresh()
-            else:
-                messagebox.showinfo("Подтверждение email",
-                    "Аккаунт создан. Подтвердите email по ссылке из письма, затем войдите.",
-                    parent=win)
-        except (CloudMarketplaceError, ValueError) as exc:
-            notify_error(exc)
-    def complete_gate_login():
-        try:
-            client.sign_in(email_var.get(), password_var.get())
-            role = (client.session.user.get("user_metadata") or {}).get("marketplace_role")
-            if not role:
-                if not selected_role["value"]:
-                    messagebox.showinfo("Выберите роль",
-                        "Для завершения входа выберите роль: Соискатель или Рекламодатель.", parent=win)
+        email_entry = tk.Entry(panel, textvariable=email_var, bg="#101f43", fg="#f4f6ff",
+                               insertbackground="white", relief="flat", bd=0,
+                               highlightthickness=1, highlightbackground="#344d82")
+        email_entry.pack(fill="x", ipady=9, pady=(4,12))
+        tk.Label(panel, text="ПАРОЛЬ  ·  НЕ МЕНЕЕ 8 СИМВОЛОВ", bg="#08152f", fg="#91a8d7",
+                 font=("DejaVu Sans", 8, "bold")).pack(anchor="w")
+        password_entry = tk.Entry(panel, textvariable=password_var, show="•", bg="#101f43",
+                                  fg="#f4f6ff", insertbackground="white", relief="flat", bd=0,
+                                  highlightthickness=1, highlightbackground="#344d82")
+        password_entry.pack(fill="x", ipady=9, pady=(4,16))
+        def register_role():
+            try:
+                client.sign_up(email_var.get(), password_var.get(), role=role)
+                if client.is_authenticated:
+                    finish_gate_auth(dialog)
+                else:
+                    messagebox.showinfo("Подтверждение email",
+                        "Аккаунт создан. Подтвердите email по ссылке из письма, затем войдите.", parent=dialog)
+            except (CloudMarketplaceError, ValueError) as exc:
+                notify_error(exc)
+        def login_role():
+            try:
+                client.sign_in(email_var.get(), password_var.get())
+                saved_role = (client.session.user.get("user_metadata") or {}).get("marketplace_role")
+                if saved_role not in ("Соискатель", "Рекламодатель"):
+                    client.set_marketplace_role(role)
+                elif saved_role != role:
+                    messagebox.showinfo("Роль аккаунта",
+                        f"У аккаунта уже сохранена роль: {saved_role}. Выберите соответствующую карточку.", parent=dialog)
                     return
-                client.set_marketplace_role(selected_role["value"])
-            update_account_label()
-            gate.place_forget()
-            refresh()
-        except (CloudMarketplaceError, ValueError) as exc:
-            notify_error(exc)
-    tk.Button(gate_actions, text="СОЗДАТЬ АККАУНТ И ОТКРЫТЬ ДОСКУ",
-              command=complete_gate_registration, bg="#7136b9", fg="white",
-              activebackground="#9854e8", relief="flat", bd=0, padx=18, pady=11,
-              font=("DejaVu Sans", 9, "bold"), cursor="hand2").pack(fill="x")
-    tk.Button(gate_actions, text="УЖЕ ЕСТЬ АККАУНТ · ВОЙТИ",
-              command=complete_gate_login, bg="#123e59", fg="#d4f7ff",
-              activebackground="#17678a", relief="flat", bd=0, padx=18, pady=9,
-              font=("DejaVu Sans", 8, "bold"), cursor="hand2").pack(fill="x", pady=(8, 0))
+                finish_gate_auth(dialog)
+            except (CloudMarketplaceError, ValueError) as exc:
+                notify_error(exc)
+        tk.Button(panel, text="ЗАРЕГИСТРИРОВАТЬСЯ", command=register_role,
+                  bg="#7136b9" if role == "Соискатель" else "#087eb7", fg="white",
+                  activebackground=accent, relief="flat", bd=0, pady=10,
+                  font=("DejaVu Sans", 9, "bold")).pack(fill="x")
+        tk.Button(panel, text="УЖЕ ЕСТЬ АККАУНТ · ВОЙТИ", command=login_role,
+                  bg="#142b4c", fg="#d4f7ff", activebackground="#24539b",
+                  relief="flat", bd=0, pady=8, font=("DejaVu Sans", 8, "bold")).pack(fill="x", pady=(8,0))
+        email_entry.focus_set()
+    def handle_role_gate_click(event):
+        for key, role in (("left","Соискатель"),("right","Рекламодатель")):
+            b = gate_layout.get(key)
+            if b and b[0] <= event.x <= b[2] and b[1] <= event.y <= b[3]:
+                show_role_auth(role)
+                return "break"
+    gate_canvas.bind("<Configure>", redraw_role_gate)
+    gate_canvas.bind("<Button-1>", handle_role_gate_click)
+    gate_canvas.bind("<Motion>", lambda event: gate_canvas.configure(cursor=("hand2" if any(
+        b and b[0] <= event.x <= b[2] and b[1] <= event.y <= b[3]
+        for b in (gate_layout.get("left"), gate_layout.get("right"))) else ""))
+    gate._canvas, gate._hit_regions = gate_canvas, gate_layout
     if client.is_authenticated:
         saved_role = (client.session.user.get("user_metadata") or {}).get("marketplace_role")
         if saved_role in ("Соискатель", "Рекламодатель"):
             gate.place_forget()
         else:
             update_account_label()
-    tk.Button(header, text="ВЫЙТИ", command=sign_out, bg="#4b2842", fg="white",
-              relief="flat", padx=12, pady=6, font=("DejaVu Sans", 8, "bold")).pack(side="right", padx=8)
     gate.lift()
-
 '''
     if gate_anchor not in board:
         raise SystemExit("Could not locate final marketplace refresh anchor for registration gate.")
@@ -478,6 +417,7 @@ def main():
     cloud = cloud.replace(old_signup, new_signup, 1)
     files["vkus/cloud_marketplace.py"] = cloud.encode("utf-8")
 
+    files["vkus/assets/marketplace_role_gate.jpg"] = download_url("https://at.adobe.com/KkJ45rxWQscEiqbr")
     files["vkus/exchange_marketplace.py"] = board.encode("utf-8")
     req = files.get("requirements.txt", b"").decode("utf-8")
     if "keyring" not in req:
