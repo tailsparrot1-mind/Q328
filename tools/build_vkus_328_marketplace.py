@@ -253,7 +253,7 @@ def main():
         gate_canvas.create_image(0, 0, image=gate._bg_image, anchor="nw")
     except Exception:
         gate_canvas.configure(bg="#050d22")
-    gate_canvas.create_rectangle(0, 0, 238, 820, fill="#030918", outline="#6935a8", width=2)
+    gate_canvas.create_rectangle(0, 0, 238, window_height - 28, fill="#030918", outline="#6935a8", width=2)
     gate_canvas.create_text(118, 72, text="Vkus", fill="#c38aff",
                            font=("DejaVu Sans", 37, "bold"))
     gate_canvas.create_text(118, 112, text="ПРОСТРАНСТВО ВОЗМОЖНОСТЕЙ",
@@ -268,17 +268,17 @@ def main():
                                 font=("DejaVu Sans", 17, "bold"))
         gate_canvas.create_text(66, y, text=caption, fill=color, anchor="w",
                                 font=("DejaVu Sans", 10, "bold" if caption == "Биржа" else "normal"))
-    gate_canvas.create_rectangle(18, window_height - 148, 220, window_height - 36, fill="#081a36", outline="#2767a2", width=1)
-    gate_canvas.create_text(34, window_height - 128, text="Ваш статус", fill="#9db7e2", anchor="w",
+    gate_canvas.create_rectangle(18, window_height - 172, 220, window_height - 48, fill="#081a36", outline="#2767a2", width=1)
+    gate_canvas.create_text(34, window_height - 152, text="Ваш статус", fill="#9db7e2", anchor="w",
                             font=("DejaVu Sans", 9))
-    gate_canvas.create_oval(34, window_height - 108, 47, window_height - 95, fill="#16e0ae", outline="")
-    gate_canvas.create_text(58, window_height - 102, text="Активен", fill="#27e7b2", anchor="w",
+    gate_canvas.create_oval(34, window_height - 132, 47, window_height - 119, fill="#16e0ae", outline="")
+    gate_canvas.create_text(58, window_height - 126, text="Активен", fill="#27e7b2", anchor="w",
                             font=("DejaVu Sans", 11, "bold"))
-    gate_canvas.create_text(34, window_height - 66, text="Премиум", fill="#ffcf65", anchor="w",
+    gate_canvas.create_text(34, window_height - 90, text="Премиум", fill="#ffcf65", anchor="w",
                             font=("DejaVu Sans", 11, "bold"))
-    gate_canvas.create_text(34, window_height - 47, text="Vkus 3.28", fill="#8199c9", anchor="w",
+    gate_canvas.create_text(34, window_height - 70, text="Vkus 3.28", fill="#8199c9", anchor="w",
                             font=("DejaVu Sans", 8))
-    gate_canvas.create_text(window_width * 0.62, window_height - 24, text="VKUS  ·  ВОЗМОЖНОСТИ НАХОДЯТ ДРУГ ДРУГА",
+    gate_canvas.create_text(window_width * 0.62, window_height - 54, text="VKUS  ·  ВОЗМОЖНОСТИ НАХОДЯТ ДРУГ ДРУГА",
                            fill="#b6a0e8", font=("DejaVu Sans", 8, "bold"))
     gate_content = tk.Frame(gate, bg="#08152f", highlightbackground="#344d82",
                             highlightthickness=1, padx=34, pady=26)
