@@ -44,8 +44,17 @@ def main():
         files[app_path] = app.encode("utf-8")
     visual_path = "vkus/exchange_visual.py"
     visual = files[visual_path].decode("utf-8")
-    old_subtitle = '"Находите целевую аудиторию и потенциальных покупателей для любой ниши",\n          18, "#e4eaff", width=980, fit=True)'
-    new_subtitle = '"Находите целевую аудиторию и потенциальных покупателей для любой ниши",\n          18, "#e4eaff", width=800, fit=True)\n    rounded(1130, 87, 1385, 133, "#21104d", "#9c35ff", 12, 1)\n    label(1257, 96, "Доска объявлений", 11, "#f2dfff", "bold", "center", width=230, fit=True)\n    label(1257, 113, "Ищу  ·  Предлагаю", 8, "#c7b0ef", "normal", "center", width=220, fit=True)'
+    old_subtitle = (
+        '"Находите целевую аудиторию и потенциальных покупателей для любой ниши",\\n'
+        '          18, "#e4eaff", width=980, fit=True)'
+    )
+    new_subtitle = (
+        '"Находите целевую аудиторию и потенциальных покупателей для любой ниши",\\n'
+        '          18, "#e4eaff", width=800, fit=True)\\n'
+        '    rounded(1130, 87, 1385, 133, "#21104d", "#9c35ff", 12, 1)\\n'
+        '    label(1257, 96, "Доска объявлений", 11, "#f2dfff", "bold", "center", width=230, fit=True)\\n'
+        '    label(1257, 113, "Ищу  ·  Предлагаю", 8, "#c7b0ef", "normal", "center", width=220, fit=True)'
+    )
     if old_subtitle not in visual:
         raise SystemExit("Could not locate Vkus 3.28 Birzha subtitle; refusing an uncertain visual patch.")
     visual = visual.replace(old_subtitle, new_subtitle, 1)
