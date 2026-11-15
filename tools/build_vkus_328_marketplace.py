@@ -245,12 +245,44 @@ def main():
     gate.place(in_=shell, x=0, y=0, relwidth=1, relheight=1)
     gate_canvas = tk.Canvas(gate, bg="#050d22", highlightthickness=0, bd=0)
     gate_canvas.place(relwidth=1, relheight=1)
-    gate_canvas.create_oval(-220, -180, 520, 560, fill="#111b49", outline="")
-    gate_canvas.create_oval(760, 260, 1500, 1000, fill="#102d4b", outline="")
-    gate_canvas.create_oval(420, -360, 1100, 320, fill="#15103e", outline="")
+    try:
+        from PIL import Image, ImageTk
+        gate_bg_path = Path(__file__).resolve().parent / "assets" / "exchange_neon_background.png"
+        gate_bg = Image.open(gate_bg_path).resize((1280, 820), Image.Resampling.LANCZOS)
+        gate._bg_image = ImageTk.PhotoImage(gate_bg)
+        gate_canvas.create_image(0, 0, image=gate._bg_image, anchor="nw")
+    except Exception:
+        gate_canvas.configure(bg="#050d22")
+    gate_canvas.create_rectangle(0, 0, 238, 820, fill="#030918", outline="#6935a8", width=2)
+    gate_canvas.create_text(118, 72, text="Vkus", fill="#c38aff",
+                           font=("DejaVu Sans", 37, "bold"))
+    gate_canvas.create_text(118, 112, text="ПРОСТРАНСТВО ВОЗМОЖНОСТЕЙ",
+                           fill="#8199c9", font=("DejaVu Sans", 7, "bold"))
+    gate_canvas.create_rectangle(12, 194, 226, 242, fill="#24104e", outline="#a64dff", width=2)
+    nav_items = [("◉", "Сообщения", 286), ("⌕", "Поиск", 350),
+                 ("◇", "Биржа", 414), ("▥", "Мониторинг", 478),
+                 ("⚙", "Настройки", 542)]
+    for symbol, caption, y in nav_items:
+        color = "#f1dfff" if caption == "Биржа" else "#9db2dc"
+        gate_canvas.create_text(38, y, text=symbol, fill="#b978ff" if caption == "Биржа" else "#6e8bc5",
+                                font=("DejaVu Sans", 17, "bold"))
+        gate_canvas.create_text(66, y, text=caption, fill=color, anchor="w",
+                                font=("DejaVu Sans", 10, "bold" if caption == "Биржа" else "normal"))
+    gate_canvas.create_rectangle(18, 672, 220, 784, fill="#081a36", outline="#2767a2", width=1)
+    gate_canvas.create_text(34, 692, text="Ваш статус", fill="#9db7e2", anchor="w",
+                            font=("DejaVu Sans", 9))
+    gate_canvas.create_oval(34, 712, 47, 725, fill="#16e0ae", outline="")
+    gate_canvas.create_text(58, 718, text="Активен", fill="#27e7b2", anchor="w",
+                            font=("DejaVu Sans", 11, "bold"))
+    gate_canvas.create_text(34, 754, text="Премиум", fill="#ffcf65", anchor="w",
+                            font=("DejaVu Sans", 11, "bold"))
+    gate_canvas.create_text(34, 773, text="Vkus 3.28", fill="#8199c9", anchor="w",
+                            font=("DejaVu Sans", 8))
+    gate_canvas.create_text(760, 794, text="VKUS  ·  ВОЗМОЖНОСТИ НАХОДЯТ ДРУГ ДРУГА",
+                           fill="#b6a0e8", font=("DejaVu Sans", 8, "bold"))
     gate_content = tk.Frame(gate, bg="#08152f", highlightbackground="#344d82",
                             highlightthickness=1, padx=34, pady=26)
-    gate_content.place(relx=0.5, rely=0.48, anchor="center", width=900, height=650)
+    gate_content.place(relx=0.615, rely=0.49, anchor="center", width=980, height=650)
     tk.Label(gate_content, text="VKUS  /  MARKETPLACE", bg="#08152f",
              fg="#8da8df", font=("DejaVu Sans", 9, "bold")).pack(pady=(2, 10))
     tk.Label(gate_content, text="НАЙДИТЕ СВОЮ ВОЗМОЖНОСТЬ", bg="#08152f",
@@ -260,7 +292,21 @@ def main():
              font=("DejaVu Sans", 10)).pack(pady=(10, 24))
     selected_role = {"value": None}
     role_cards = tk.Frame(gate_content, bg="#08152f")
-    role_cards.pack(fill="x", pady=(0, 18))
+    role_cards.pack(fill="x", pady=(0, 12))
+    benefits = tk.Frame(gate_content, bg="#08152f")
+    benefits.pack(fill="x", pady=(0, 12))
+    for title, caption, accent in (
+        ("ЕДИНАЯ ПЛОЩАДКА", "Работа, услуги и задачи", "#c18aff"),
+        ("ПРЯМОЙ КОНТАКТ", "Общайтесь без посредников", "#42d8f5"),
+        ("ВАШ ВЫБОР", "Вы сами задаёте направление", "#72e5bd"),
+    ):
+        chip = tk.Frame(benefits, bg="#101f40", highlightbackground=accent,
+                        highlightthickness=1, padx=10, pady=8)
+        chip.pack(side="left", fill="x", expand=True, padx=4)
+        tk.Label(chip, text=title, bg="#101f40", fg=accent,
+                 font=("DejaVu Sans", 8, "bold")).pack(anchor="w")
+        tk.Label(chip, text=caption, bg="#101f40", fg="#a9badc",
+                 font=("DejaVu Sans", 8)).pack(anchor="w", pady=(3, 0))
     def choose_gate_role(role):
         selected_role["value"] = role
         seeker.configure(bg="#39206b" if role == "Соискатель" else "#111f40",
