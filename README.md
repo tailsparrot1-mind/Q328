@@ -18,7 +18,7 @@ git clone --recurse-submodules https://github.com/tailsparrot1-mind/Q328.git
 ```
 
 ## 3.28 build artifact
-The original 3.28 Actions artifact is retained in the source repository. To copy its ZIP, launch screenshot and checksum file into this repository, open **Actions → Import Vkus 3.28 artifact → Run workflow**. The workflow downloads the original artifact and commits the recovered files under `recovered-builds/3.28/`. Artifact expires 2027-02-12.
+The original 3.28 application ZIP, launch screenshot and checksum manifest have already been imported into `recovered-builds/3.28/` and verified. The manual Actions workflow **Verify Vkus 3.28 artifact** rechecks the files and ZIP checksum; it does not download or import the source artifact again. The original source artifact expires 2027-02-12.
 
 ## Important
 - Do not recreate/reset the existing Frankfurt Supabase project.
@@ -28,4 +28,4 @@ The original 3.28 Actions artifact is retained in the source repository. To copy
 
 ## Vkus 3.28 recovered build
 
-The original GitHub Actions artifact is imported by `.github/workflows/import-vkus-328-artifact.yml` into `recovered-builds/3.28/` (application ZIP, launch screenshot, and SHA-256 manifest). The workflow verifies the application ZIP checksum before committing the files.
+The imported application ZIP, launch screenshot, SHA-256 manifest and source provenance are stored in `recovered-builds/3.28/`. The workflow `.github/workflows/import-vkus-328-artifact.yml` is now verification-only: it checks that the files exist and that the ZIP checksum matches the manifest.
