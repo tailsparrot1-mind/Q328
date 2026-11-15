@@ -2,6 +2,8 @@ name: Import Vkus 3.28 artifact
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
   push:
     branches: [main]
 
