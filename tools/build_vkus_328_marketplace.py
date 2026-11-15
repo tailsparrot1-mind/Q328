@@ -387,11 +387,12 @@ def main():
             raise ValueError("Введите корректный email.")
         if len(password) < 8:
             raise ValueError("Пароль должен содержать не менее 8 символов.")
-        if role not in ("Соискатель", "Рекламодатель"):
+        if role is not None and role not in ("Соискатель", "Рекламодатель"):
             raise ValueError("Выберите роль перед регистрацией.")
-        result = self._request("POST", "/auth/v1/signup",
-                               {"email": email, "password": password,
-                                "data": {"marketplace_role": role}})
+        payload = {"email": email, "password": password}
+        if role is not None:
+            payload["data"] = {"marketplace_role": role}
+        result = self._request("POST", "/auth/v1/signup", payload)
         self._accept_auth_result(result)
         return result or {}
 
