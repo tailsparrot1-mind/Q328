@@ -1,0 +1,50 @@
+name: Vkus 3.28 Marketplace Candidate
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/build_vkus_328_marketplace.py'
+      - '.github/workflows/build-vkus-328-marketplace.yml'
+  push:
+    branches: [feature/vkus-328-marketplace-board]
+    paths:
+      - 'tools/build_vkus_328_marketplace.py'
+      - '.github/workflows/build-vkus-328-marketplace.yml'
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Build isolated candidate from original 3.28 archive
+        run: python tools/build_vkus_328_marketplace.py
+      - name: Install test/runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-tk xvfb
+          python -m pip install --upgrade pip
+          python -m pip install Pillow selenium keyring
+      - name: Compile all Python modules
+        run: |
+          mkdir -p /tmp/vkus-candidate
+          unzip -q artifacts/Vkus_3.28_Marketplace_Candidate.zip -d /tmp/vkus-candidate
+          python -m compileall -q /tmp/vkus-candidate
+      - name: Run cloud marketplace unit tests (network mocked)
+        run: |
+          cd /tmp/vkus-candidate
+          python -m unittest tests/test_cloud_marketplace.py -v
+      - name: Validate candidate archive and checksum
+        run: |
+          unzip -t artifacts/Vkus_3.28_Marketplace_Candidate.zip
+          cd artifacts
+          sha256sum -c SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Vkus-3.28-Marketplace-Candidate
+          path: |
+            artifacts/Vkus_3.28_Marketplace_Candidate.zip
+            artifacts/SHA256SUMS.txt
+            artifacts/BUILD_NOTES.md
