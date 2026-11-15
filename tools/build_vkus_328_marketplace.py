@@ -240,6 +240,7 @@ def main():
     # has a persisted marketplace role (Соискатель or Рекламодатель).
     gate_anchor = '    for variable in (query_var, kind_var, category_var, city_var):\n'
     gate_patch = '''    # Role selection + registration gate. The underlying board is not visible before auth.
+    auth_bar.pack_forget()
     gate = tk.Frame(shell, bg="#050d22", highlightbackground="#8a4de0", highlightthickness=1)
     gate.place(in_=shell, x=0, y=0, relwidth=1, relheight=1)
     gate_canvas = tk.Canvas(gate, bg="#050d22", highlightthickness=0, bd=0)
@@ -324,7 +325,7 @@ def main():
             client.sign_up(email_var.get(), password_var.get(), role=selected_role["value"])
             if client.is_authenticated:
                 update_account_label()
-                gate.destroy()
+                gate.place_forget()
                 refresh()
             else:
                 messagebox.showinfo("Подтверждение email",
@@ -343,7 +344,7 @@ def main():
                     return
                 client.set_marketplace_role(selected_role["value"])
             update_account_label()
-            gate.destroy()
+            gate.place_forget()
             refresh()
         except (CloudMarketplaceError, ValueError) as exc:
             notify_error(exc)
@@ -358,15 +359,33 @@ def main():
     if client.is_authenticated:
         saved_role = (client.session.user.get("user_metadata") or {}).get("marketplace_role")
         if saved_role in ("Соискатель", "Рекламодатель"):
-            gate.destroy()
+            gate.place_forget()
         else:
             update_account_label()
+    tk.Button(header, text="ВЫЙТИ", command=sign_out, bg="#4b2842", fg="white",
+              relief="flat", padx=12, pady=6, font=("DejaVu Sans", 8, "bold")).pack(side="right", padx=8)
     gate.lift()
 
 '''
     if gate_anchor not in board:
         raise SystemExit("Could not locate final marketplace refresh anchor for registration gate.")
     board = board.replace(gate_anchor, gate_patch + gate_anchor, 1)
+
+    signout_old = '''        account_label.configure(text="Не выполнен вход", fg="#9fb4df")
+        refresh()
+
+    def edit_profile():
+'''
+    signout_new = '''        account_label.configure(text="Не выполнен вход", fg="#9fb4df")
+        refresh()
+        gate.place(in_=shell, x=0, y=0, relwidth=1, relheight=1)
+        gate.lift()
+
+    def edit_profile():
+'''
+    if signout_old not in board:
+        raise SystemExit("Could not locate sign-out handler for gate restoration.")
+    board = board.replace(signout_old, signout_new, 1)
 
     # Attach the chosen role to Supabase Auth user metadata and restore it on later logins.
     cloud = files["vkus/cloud_marketplace.py"].decode("utf-8")
