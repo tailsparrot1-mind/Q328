@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "artifacts"
 OUTER = ROOT / "recovered-builds/3.28/Vkus_3.28_NO_SPLASH.zip"
-BASE = "https://raw.githubusercontent.com/tailsparrot1-mind/vkus--3.17-button/34f6b457133b90fceded344230b2836d2fd1a64e/"
+BASE = "https://raw.githubusercontent.com/tailsparrot1-mind/vkus--3.17-button/2bf4c040cd44e2ecc9afdb88ef72ac335df91a3d/"
 FILES = {
     "vkus/cloud_marketplace.py": "vkus/cloud_marketplace.py",
     "vkus/exchange_marketplace.py": "vkus/exchange_marketplace.py",
@@ -74,7 +74,7 @@ def main():
     (OUT / "BUILD_NOTES.md").write_text(
         "# Vkus 3.28 — Marketplace candidate\n\n"
         "- Base: immutable recovered-builds/3.28/Vkus_3.28_NO_SPLASH.zip.\n"
-        "- Added Supabase client and card-based noticeboard UI from pinned source commit 34f6b457.\n"
+        "- Added Supabase client and card-based noticeboard UI from pinned source commit 2bf4c040.\n"
         "- Added a dedicated \"Доска объявлений\" button inside the existing Birzha search panel.\n"
         "- Preserved the existing audience-search UI and its explanatory card.\n"
         "- Captured real Xvfb launch screenshots for Birzha and the noticeboard.\n"
