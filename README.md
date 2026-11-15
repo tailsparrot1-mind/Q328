@@ -25,3 +25,7 @@ The original 3.28 Actions artifact is retained in the source repository. To copy
 - Do not commit secrets, tokens, session files or service-role keys.
 - The cloud marketplace is a separate open PR; real two-user testing remains outstanding.
 - Taplink webhook exists, but Robokassa is not connected and payments are not production-ready.
+
+## Vkus 3.28 recovered build
+
+The original GitHub Actions artifact is imported by `.github/workflows/import-vkus-328-artifact.yml` into `recovered-builds/3.28/` (application ZIP, launch screenshot, and SHA-256 manifest). The workflow verifies the application ZIP checksum before committing the files.
