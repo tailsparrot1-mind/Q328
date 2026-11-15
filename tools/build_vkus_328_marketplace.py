@@ -88,7 +88,7 @@ def main():
     # not a default Tk utility window. Keep all existing marketplace actions.
     board = files["vkus/exchange_marketplace.py"].decode("utf-8")
     visual_replacements = [
-        ('win.geometry("1180x760")', 'parent.update_idletasks()\\n    window_width = max(1280, parent.winfo_width())\\n    window_height = max(820, parent.winfo_height())\\n    win.geometry(f"{window_width}x{window_height}+{parent.winfo_rootx()}+{parent.winfo_rooty()}")'),
+        ('win.geometry("1180x760")', 'parent.update_idletasks()\n    window_width = max(1280, parent.winfo_width())\n    window_height = max(820, parent.winfo_height())\n    win.geometry(f"{window_width}x{window_height}+{parent.winfo_rootx()}+{parent.winfo_rooty()}")'),
         ('win.minsize(960, 640)', 'win.minsize(1080, 720)'),
         ('win.configure(bg="#050b1b")', 'win.configure(bg="#030817")'),
         ('shell = tk.Frame(win, bg="#07122a", highlightbackground="#7136c3", highlightthickness=1)\n    shell.pack(fill="both", expand=True, padx=10, pady=10)',
