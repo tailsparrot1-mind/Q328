@@ -278,11 +278,11 @@ def main():
                             font=("DejaVu Sans", 11, "bold"))
     gate_canvas.create_text(34, window_height - 70, text="Vkus 3.28", fill="#8199c9", anchor="w",
                             font=("DejaVu Sans", 8))
-    gate_canvas.create_text(window_width * 0.62, window_height - 54, text="VKUS  ·  ВОЗМОЖНОСТИ НАХОДЯТ ДРУГ ДРУГА",
+    gate_canvas.create_text((238 + window_width) / 2, window_height - 54, text="VKUS  ·  ВОЗМОЖНОСТИ НАХОДЯТ ДРУГ ДРУГА",
                            fill="#b6a0e8", font=("DejaVu Sans", 8, "bold"))
     gate_content = tk.Frame(gate, bg="#08152f", highlightbackground="#344d82",
                             highlightthickness=1, padx=34, pady=26)
-    gate_content.place(relx=0.62, rely=0.49, anchor="center", width=max(980, window_width - 280), height=700)
+    gate_content.place(relx=(238 + window_width) / (2 * window_width), rely=0.49, anchor="center", width=max(980, window_width - 280), height=700)
     tk.Label(gate_content, text="VKUS  /  MARKETPLACE", bg="#08152f",
              fg="#8da8df", font=("DejaVu Sans", 9, "bold")).pack(pady=(2, 10))
     tk.Label(gate_content, text="ДОСКА ОБЪЯВЛЕНИЙ", bg="#08152f",
