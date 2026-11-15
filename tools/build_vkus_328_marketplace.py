@@ -340,10 +340,14 @@ def main():
                 return "break"
     gate_canvas.bind("<Configure>", redraw_role_gate)
     gate_canvas.bind("<Button-1>", handle_role_gate_click)
-    gate_canvas.bind("<Motion>", lambda event: gate_canvas.configure(cursor=("hand2" if any(
-        b and b[0] <= event.x <= b[2] and b[1] <= event.y <= b[3]
-        for b in (gate_layout.get("left"), gate_layout.get("right"))) else ""))
+    def update_gate_cursor(event):
+        inside = any(bounds and bounds[0] <= event.x <= bounds[2]
+                     and bounds[1] <= event.y <= bounds[3]
+                     for bounds in (gate_layout.get("left"), gate_layout.get("right")))
+        gate_canvas.configure(cursor="hand2" if inside else "")
+    gate_canvas.bind("<Motion>", update_gate_cursor)
     gate._canvas, gate._hit_regions = gate_canvas, gate_layout
+    win._marketplace_gate_canvas, win._marketplace_gate_layout = gate_canvas, gate_layout
     if client.is_authenticated:
         saved_role = (client.session.user.get("user_metadata") or {}).get("marketplace_role")
         if saved_role in ("Соискатель", "Рекламодатель"):
