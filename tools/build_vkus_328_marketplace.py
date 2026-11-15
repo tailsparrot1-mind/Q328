@@ -88,7 +88,7 @@ def main():
     # not a default Tk utility window. Keep all existing marketplace actions.
     board = files["vkus/exchange_marketplace.py"].decode("utf-8")
     visual_replacements = [
-        ('win.geometry("1180x760")', 'win.geometry("1280x820")'),
+        ('win.geometry("1180x760")', 'parent.update_idletasks()\\n    window_width = max(1280, parent.winfo_width())\\n    window_height = max(820, parent.winfo_height())\\n    win.geometry(f"{window_width}x{window_height}+{parent.winfo_rootx()}+{parent.winfo_rooty()}")'),
         ('win.minsize(960, 640)', 'win.minsize(1080, 720)'),
         ('win.configure(bg="#050b1b")', 'win.configure(bg="#030817")'),
         ('shell = tk.Frame(win, bg="#07122a", highlightbackground="#7136c3", highlightthickness=1)\n    shell.pack(fill="both", expand=True, padx=10, pady=10)',
@@ -248,7 +248,7 @@ def main():
     try:
         from PIL import Image, ImageTk
         gate_bg_path = Path(__file__).resolve().parent / "assets" / "exchange_neon_background.png"
-        gate_bg = Image.open(gate_bg_path).resize((1280, 820), Image.Resampling.LANCZOS)
+        gate_bg = Image.open(gate_bg_path).resize((window_width, window_height), Image.Resampling.LANCZOS)
         gate._bg_image = ImageTk.PhotoImage(gate_bg)
         gate_canvas.create_image(0, 0, image=gate._bg_image, anchor="nw")
     except Exception:
@@ -268,26 +268,26 @@ def main():
                                 font=("DejaVu Sans", 17, "bold"))
         gate_canvas.create_text(66, y, text=caption, fill=color, anchor="w",
                                 font=("DejaVu Sans", 10, "bold" if caption == "Биржа" else "normal"))
-    gate_canvas.create_rectangle(18, 672, 220, 784, fill="#081a36", outline="#2767a2", width=1)
-    gate_canvas.create_text(34, 692, text="Ваш статус", fill="#9db7e2", anchor="w",
+    gate_canvas.create_rectangle(18, window_height - 148, 220, window_height - 36, fill="#081a36", outline="#2767a2", width=1)
+    gate_canvas.create_text(34, window_height - 128, text="Ваш статус", fill="#9db7e2", anchor="w",
                             font=("DejaVu Sans", 9))
-    gate_canvas.create_oval(34, 712, 47, 725, fill="#16e0ae", outline="")
-    gate_canvas.create_text(58, 718, text="Активен", fill="#27e7b2", anchor="w",
+    gate_canvas.create_oval(34, window_height - 108, 47, window_height - 95, fill="#16e0ae", outline="")
+    gate_canvas.create_text(58, window_height - 102, text="Активен", fill="#27e7b2", anchor="w",
                             font=("DejaVu Sans", 11, "bold"))
-    gate_canvas.create_text(34, 754, text="Премиум", fill="#ffcf65", anchor="w",
+    gate_canvas.create_text(34, window_height - 66, text="Премиум", fill="#ffcf65", anchor="w",
                             font=("DejaVu Sans", 11, "bold"))
-    gate_canvas.create_text(34, 773, text="Vkus 3.28", fill="#8199c9", anchor="w",
+    gate_canvas.create_text(34, window_height - 47, text="Vkus 3.28", fill="#8199c9", anchor="w",
                             font=("DejaVu Sans", 8))
-    gate_canvas.create_text(760, 794, text="VKUS  ·  ВОЗМОЖНОСТИ НАХОДЯТ ДРУГ ДРУГА",
+    gate_canvas.create_text(window_width * 0.62, window_height - 24, text="VKUS  ·  ВОЗМОЖНОСТИ НАХОДЯТ ДРУГ ДРУГА",
                            fill="#b6a0e8", font=("DejaVu Sans", 8, "bold"))
     gate_content = tk.Frame(gate, bg="#08152f", highlightbackground="#344d82",
                             highlightthickness=1, padx=34, pady=26)
-    gate_content.place(relx=0.615, rely=0.49, anchor="center", width=980, height=650)
+    gate_content.place(relx=0.62, rely=0.49, anchor="center", width=max(980, window_width - 280), height=700)
     tk.Label(gate_content, text="VKUS  /  MARKETPLACE", bg="#08152f",
              fg="#8da8df", font=("DejaVu Sans", 9, "bold")).pack(pady=(2, 10))
-    tk.Label(gate_content, text="НАЙДИТЕ СВОЮ ВОЗМОЖНОСТЬ", bg="#08152f",
+    tk.Label(gate_content, text="ДОСКА ОБЪЯВЛЕНИЙ", bg="#08152f",
              fg="#f4f0ff", font=("DejaVu Sans", 22, "bold")).pack()
-    tk.Label(gate_content, text="Доска объявлений Vkus объединяет тех, кто ищет работу,\\nи тех, кому нужны специалисты.",
+    tk.Label(gate_content, text="Выберите свою роль и начните находить возможности в Vkus.",
              bg="#08152f", fg="#a9badc", justify="center",
              font=("DejaVu Sans", 10)).pack(pady=(10, 24))
     selected_role = {"value": None}
