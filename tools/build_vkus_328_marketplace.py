@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "artifacts"
 OUTER = ROOT / "recovered-builds/3.28/Vkus_3.28_NO_SPLASH.zip"
-BASE = "https://raw.githubusercontent.com/tailsparrot1-mind/vkus--3.17-button/feature/supabase-marketplace-client/"
+BASE = "https://raw.githubusercontent.com/tailsparrot1-mind/vkus--3.17-button/588ec2de4b3a84353d836822aa28175d0d4cf738/"
 FILES = {
     "vkus/cloud_marketplace.py": "vkus/cloud_marketplace.py",
     "vkus/exchange_marketplace.py": "vkus/exchange_marketplace.py",
@@ -56,6 +56,7 @@ def main():
     if old_button not in visual:
         raise SystemExit("Could not locate the existing advanced-search label; refusing an uncertain visual patch.")
     visual = visual.replace(old_button, new_button, 1)
+    visual = visual.replace('"VKUS 3.27"', '"VKUS 3.28"', 1)
     files[visual_path] = visual.encode("utf-8")
     for target, source in FILES.items():
         files[target] = download(source)
@@ -73,9 +74,11 @@ def main():
     (OUT / "BUILD_NOTES.md").write_text(
         "# Vkus 3.28 — Marketplace candidate\n\n"
         "- Base: immutable recovered-builds/3.28/Vkus_3.28_NO_SPLASH.zip.\n"
-        "- Added Supabase client and marketplace UI module from reviewed feature branch.\n"
-        "- Connected existing Birzha CTA to cloud noticeboard window.\n"
-        "- Original archive and Supabase database were not modified.\n"
+        "- Added Supabase client and noticeboard UI from pinned source commit 588ec2de.\n"
+        "- Added a dedicated \"Доска объявлений\" button inside the existing Birzha search panel.\n"
+        "- Preserved the existing audience-search UI and its explanatory card.\n"
+        "- Captured real Xvfb launch screenshots for Birzha and the noticeboard.\n"
+        "- Original archive and Supabase database were not modified; no database writes were made.\n"
         "- Real multi-user signup/login and listing exchange still require manual account smoke tests.\n"
         f"- SHA-256: {sha}\n", encoding="utf-8")
     print(f"BUILT {candidate} ({candidate.stat().st_size} bytes)")
