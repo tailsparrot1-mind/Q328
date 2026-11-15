@@ -258,7 +258,7 @@ def main():
                            font=("DejaVu Sans", 37, "bold"))
     gate_canvas.create_text(118, 112, text="ПРОСТРАНСТВО ВОЗМОЖНОСТЕЙ",
                            fill="#8199c9", font=("DejaVu Sans", 7, "bold"))
-    gate_canvas.create_rectangle(12, 194, 226, 242, fill="#24104e", outline="#a64dff", width=2)
+    gate_canvas.create_rectangle(12, 390, 226, 438, fill="#24104e", outline="#a64dff", width=2)
     nav_items = [("◉", "Сообщения", 286), ("⌕", "Поиск", 350),
                  ("◇", "Биржа", 414), ("▥", "Мониторинг", 478),
                  ("⚙", "Настройки", 542)]
