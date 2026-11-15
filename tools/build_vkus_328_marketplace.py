@@ -113,7 +113,7 @@ def main():
         ('card = tk.Frame(cards_frame, bg="#0b1a39",\n                            highlightbackground="#304779", highlightthickness=1,\n                            padx=14, pady=12)',
          'card = tk.Frame(cards_frame, bg="#101f43",\n                            highlightbackground="#405b91", highlightthickness=1,\n                            padx=18, pady=16)'),
         ('columnspan=2 if len(rows) == 1 else 1,\n                      sticky="nsew", padx=8, pady=8)',
-         'columnspan=1,\n                      sticky="nsew", padx=10, pady=10)'),
+         'columnspan=2 if len(rows) == 1 else 1,\n                      sticky="n" if len(rows) == 1 else "nsew", padx=10, pady=10)\n            if len(rows) == 1:\n                card.configure(width=780, height=178)\n                card.grid_propagate(False)'),
         ('top = tk.Frame(card, bg="#0b1a39")', 'top = tk.Frame(card, bg="#101f43")'),
         ('bg="#0b1a39", fg="#728bb8",', 'bg="#101f43", fg="#8ca3d0",'),
         ('bg="#0b1a39", fg="#f0f4ff",\n                     font=("DejaVu Sans", 11, "bold")',
