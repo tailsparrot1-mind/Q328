@@ -75,3 +75,4 @@ jobs:
             artifacts/Vkus_3.28_Marketplace_Candidate.zip
             artifacts/SHA256SUMS.txt
             artifacts/BUILD_NOTES.md
+            /tmp/vkus-candidate/screenshots/*.png
