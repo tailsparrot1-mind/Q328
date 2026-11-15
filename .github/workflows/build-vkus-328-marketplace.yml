@@ -40,7 +40,7 @@ jobs:
         run: |
           cd /tmp/vkus-candidate
           mkdir -p screenshots
-          xvfb-run -a python - <<'PY'
+          xvfb-run -a --server-args="-screen 0 1650x940x24" python - <<'PY'
           import time
           import tkinter as tk
           from PIL import ImageGrab
