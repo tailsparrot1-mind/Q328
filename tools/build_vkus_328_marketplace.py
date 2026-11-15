@@ -281,14 +281,14 @@ def main():
              font=("DejaVu Sans", 27, "bold")).pack(anchor="w")
     tk.Label(seeker, text="СОИСКАТЕЛЬ", bg="#111f40", fg="#ead8ff",
              font=("DejaVu Sans", 14, "bold")).pack(anchor="w", pady=(5, 5))
-    tk.Label(seeker, text="Ищу работу  ·  Предлагаю услуги\nПокажите, что умеете, и найдите заказчика.",
+    tk.Label(seeker, text="Ищу работу  ·  Предлагаю услуги\\nПокажите, что умеете, и найдите заказчика.",
              bg="#111f40", fg="#a9badc", justify="left",
              font=("DejaVu Sans", 9)).pack(anchor="w")
     tk.Label(advertiser, text="⌕", bg="#111f40", fg="#35c9ef",
              font=("DejaVu Sans", 27, "bold")).pack(anchor="w")
     tk.Label(advertiser, text="РЕКЛАМОДАТЕЛЬ", bg="#111f40", fg="#c5f4ff",
              font=("DejaVu Sans", 14, "bold")).pack(anchor="w", pady=(5, 5))
-    tk.Label(advertiser, text="Ищу исполнителя  ·  Размещаю задачу\nНайдите специалиста под свою потребность.",
+    tk.Label(advertiser, text="Ищу исполнителя  ·  Размещаю задачу\\nНайдите специалиста под свою потребность.",
              bg="#111f40", fg="#a9badc", justify="left",
              font=("DejaVu Sans", 9)).pack(anchor="w")
     for widget in (seeker, *seeker.winfo_children()):
