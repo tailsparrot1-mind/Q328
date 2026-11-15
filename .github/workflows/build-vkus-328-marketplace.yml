@@ -36,6 +36,33 @@ jobs:
         run: |
           cd /tmp/vkus-candidate
           python -m unittest tests/test_cloud_marketplace.py -v
+      - name: Launch Vkus and capture real UI screenshots under Xvfb
+        run: |
+          cd /tmp/vkus-candidate
+          mkdir -p screenshots
+          xvfb-run -a python - <<'PY'
+          import time
+          from PIL import ImageGrab
+          from vkus.app import VkusApp
+          from vkus.exchange_visual import install_exchange_visuals
+          from vkus.cloud_marketplace import SupabaseMarketplaceClient
+
+          SupabaseMarketplaceClient.list_listings = lambda self, **kwargs: []
+          install_exchange_visuals()
+          app = VkusApp()
+          app._unlock()
+          app.root.update()
+          app._show_exchange()
+          app.root.update()
+          time.sleep(1)
+          ImageGrab.grab().save("screenshots/Vkus_3.28_Birzha.png")
+          from vkus.exchange_marketplace import open_cloud_marketplace_window
+          open_cloud_marketplace_window(app.root)
+          app.root.update()
+          time.sleep(1)
+          ImageGrab.grab().save("screenshots/Vkus_3.28_Marketplace_Board.png")
+          app.root.destroy()
+          PY
       - name: Validate candidate archive and checksum
         run: |
           unzip -t artifacts/Vkus_3.28_Marketplace_Candidate.zip
