@@ -8,7 +8,8 @@ Q328 is the canonical continuation point for Vkus development.
 - `cloud-marketplace-pr/` — pinned to the open cloud-marketplace PR head `6325c6e6edee9a05c729a68a719d5d0634d4bd8d`; kept separate because PR #2 is not merged.
 - `docs/PROJECT_PASSPORT_Vkus_v2.0.md` — current audited passport copied into Q328.
 - `store/` — copied Store README and both HTML variants.
-- `infrastructure/SUPABASE_AND_PAYMENTS.md` — Frankfurt DB and payment integration inventory (no secrets).
+- `infrastructure/SUPABASE_AND_PAYMENTS.md` — concise Frankfurt DB and payment inventory.
+- `infrastructure/supabase/` — detailed schema/migration snapshot and source of the two deployed Edge Functions (no secrets).
 - `Q328_MIGRATION_MANIFEST.md` — provenance, version checkpoints, checksums, evidence and outstanding work.
 
 ## Clone all source trees
