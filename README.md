@@ -1,3 +1,26 @@
-# VKUS — Q328
+# VKUS — Q328 master repository
 
-Master consolidation repository. The migration manifest and source snapshots will be added here.
+Q328 is the canonical continuation point for Vkus development.
+
+## Contents
+- `app-source/` — pinned submodule of `tailsparrot1-mind/vkus--3.17-button` at `3afe7b837fe311d6d3252ffa0cab5af6e9f0ca32`. Includes the complete native app tree, local SQLite marketplace implementation, assets, tests and CI workflows.
+- `project-docs/` — pinned submodule of `tailsparrot1-mind/Vkus-Development` at `4377c91ab7e8ab2e8e3941db2a73e5b031dad9b0`. Includes the latest project passport, Store and historical package materials.
+- `cloud-marketplace-pr/` — pinned to the open cloud-marketplace PR head `6325c6e6edee9a05c729a68a719d5d0634d4bd8d`; kept separate because PR #2 is not merged.
+- `docs/PROJECT_PASSPORT_Vkus_v2.0.md` — current audited passport copied into Q328.
+- `store/` — copied Store README and both HTML variants.
+- `infrastructure/SUPABASE_AND_PAYMENTS.md` — Frankfurt DB and payment integration inventory (no secrets).
+- `Q328_MIGRATION_MANIFEST.md` — provenance, version checkpoints, checksums, evidence and outstanding work.
+
+## Clone all source trees
+```bash
+git clone --recurse-submodules https://github.com/tailsparrot1-mind/Q328.git
+```
+
+## 3.28 build artifact
+The original 3.28 Actions artifact is retained in the source repository. To copy its ZIP, launch screenshot and checksum file into this repository, open **Actions → Import Vkus 3.28 artifact → Run workflow**. The workflow downloads the original artifact and commits the recovered files under `recovered-builds/3.28/`. Artifact expires 2027-02-12.
+
+## Important
+- Do not recreate/reset the existing Frankfurt Supabase project.
+- Do not commit secrets, tokens, session files or service-role keys.
+- The cloud marketplace is a separate open PR; real two-user testing remains outstanding.
+- Taplink webhook exists, but Robokassa is not connected and payments are not production-ready.
