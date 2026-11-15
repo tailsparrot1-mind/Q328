@@ -82,6 +82,56 @@ def main():
     files[visual_path] = visual.encode("utf-8")
     for target, source in FILES.items():
         files[target] = download(source)
+
+    # Visual refinement: make the board feel like a Vkus product surface,
+    # not a default Tk utility window. Keep all existing marketplace actions.
+    board = files["vkus/exchange_marketplace.py"].decode("utf-8")
+    visual_replacements = [
+        ('win.geometry("1180x760")', 'win.geometry("1280x820")'),
+        ('win.minsize(960, 640)', 'win.minsize(1080, 720)'),
+        ('win.configure(bg="#050b1b")', 'win.configure(bg="#030817")'),
+        ('shell = tk.Frame(win, bg="#07122a", highlightbackground="#7136c3", highlightthickness=1)\n    shell.pack(fill="both", expand=True, padx=10, pady=10)',
+         'shell = tk.Frame(win, bg="#07132d", highlightbackground="#8548dc", highlightthickness=1)\n    shell.pack(fill="both", expand=True, padx=14, pady=14)'),
+        ('header.pack(fill="x", padx=18, pady=(15, 8))', 'header.pack(fill="x", padx=24, pady=(20, 14))'),
+        ('text="ДОСКА ОБЪЯВЛЕНИЙ", bg="#07122a", fg="#d18aff",\n             font=("DejaVu Sans", 17, "bold")',
+         'text="ДОСКА ОБЪЯВЛЕНИЙ", bg="#07122a", fg="#d9a0ff",\n             font=("DejaVu Sans", 21, "bold")'),
+        ('account_label = tk.Label(header, text="Не выполнен вход", bg="#07122a",\n                             fg="#9fb4df", font=("DejaVu Sans", 9))',
+         'account_label = tk.Label(header, text="Не выполнен вход", bg="#07122a",\n                             fg="#9fb4df", font=("DejaVu Sans", 9, "bold"))'),
+        ('auth_bar.pack(fill="x", padx=18, pady=(0, 10))', 'auth_bar.pack(fill="x", padx=24, pady=(0, 14))'),
+        ('filters.pack(fill="x", padx=18, pady=(0, 10))', 'filters.pack(fill="x", padx=24, pady=(0, 16))'),
+        ('cell.pack(side="left", padx=(0, 9), anchor="n")', 'cell.pack(side="left", padx=(0, 14), anchor="n")'),
+        ('body.pack(fill="both", expand=True, padx=12, pady=(0, 10))', 'body.pack(fill="both", expand=True, padx=18, pady=(0, 14))'),
+        ('cards_frame.grid_columnconfigure(0, weight=1, uniform="market-cards")\n    cards_frame.grid_columnconfigure(1, weight=1, uniform="market-cards")',
+         'cards_frame.grid_columnconfigure(0, weight=1, uniform="market-cards")\n    cards_frame.grid_columnconfigure(1, weight=1, uniform="market-cards")'),
+        ('empty = tk.Frame(cards_frame, bg="#0a1731",\n                             highlightbackground="#334b7e", highlightthickness=1)',
+         'empty = tk.Frame(cards_frame, bg="#101f43",\n                             highlightbackground="#405b91", highlightthickness=1)'),
+        ('text="ПОКА НЕТ ОБЪЯВЛЕНИЙ", bg="#0a1731",\n                     fg="#d7a0ff", font=("DejaVu Sans", 13, "bold")',
+         'text="ПОКА НЕТ ОБЪЯВЛЕНИЙ", bg="#101f43",\n                     fg="#ddaaff", font=("DejaVu Sans", 15, "bold")'),
+        ('bg="#0a1731", fg="#9fb4df", font=("DejaVu Sans", 9),\n                     wraplength=720',
+         'bg="#101f43", fg="#b3c3e5", font=("DejaVu Sans", 9),\n                     wraplength=760'),
+        ('card = tk.Frame(cards_frame, bg="#0b1a39",\n                            highlightbackground="#304779", highlightthickness=1,\n                            padx=14, pady=12)',
+         'card = tk.Frame(cards_frame, bg="#101f43",\n                            highlightbackground="#405b91", highlightthickness=1,\n                            padx=18, pady=16)'),
+        ('columnspan=2 if len(rows) == 1 else 1,\n                      sticky="nsew", padx=8, pady=8)',
+         'columnspan=1,\n                      sticky="nsew", padx=10, pady=10)'),
+        ('top = tk.Frame(card, bg="#0b1a39")', 'top = tk.Frame(card, bg="#101f43")'),
+        ('bg="#0b1a39", fg="#728bb8",', 'bg="#101f43", fg="#8ca3d0",'),
+        ('bg="#0b1a39", fg="#f0f4ff",\n                     font=("DejaVu Sans", 11, "bold")',
+         'bg="#101f43", fg="#f4f6ff",\n                     font=("DejaVu Sans", 12, "bold")'),
+        ('bg="#0b1a39", fg="#a9badc",', 'bg="#101f43", fg="#b6c6e4",'),
+        ('bg="#0b1a39", fg="#b98aff",', 'bg="#101f43", fg="#d2a0ff",'),
+        ('details.pack(fill="x", padx=18, pady=(0, 8))', 'details.pack(fill="x", padx=24, pady=(0, 10))'),
+        ('actions.pack(fill="x", padx=18, pady=(0, 14))', 'actions.pack(fill="x", padx=24, pady=(0, 20))'),
+        ('highlightbackground="#304779")', 'highlightbackground="#405b91")'),
+        ('padx=11, pady=7,\n                  font=("DejaVu Sans", 8, "bold")',
+         'padx=14, pady=9,\n                  font=("DejaVu Sans", 9, "bold")'),
+    ]
+    for old, new in visual_replacements:
+        if old in board:
+            board = board.replace(old, new, 1)
+    # Keep the card grid visually balanced at every result count.
+    if 'columnspan=2 if len(rows) == 1 else 1' in board:
+        raise SystemExit("Single-card full-width stretch was not removed.")
+    files["vkus/exchange_marketplace.py"] = board.encode("utf-8")
     req = files.get("requirements.txt", b"").decode("utf-8")
     if "keyring" not in req:
         files["requirements.txt"] = (req.rstrip() + "\nkeyring>=25.2\n").encode("utf-8")
