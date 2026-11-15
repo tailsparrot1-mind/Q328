@@ -255,7 +255,7 @@ def main():
              fg="#8da8df", font=("DejaVu Sans", 9, "bold")).pack(pady=(2, 10))
     tk.Label(gate_content, text="НАЙДИТЕ СВОЮ ВОЗМОЖНОСТЬ", bg="#08152f",
              fg="#f4f0ff", font=("DejaVu Sans", 22, "bold")).pack()
-    tk.Label(gate_content, text="Доска объявлений Vkus объединяет тех, кто ищет работу,\nи тех, кому нужны специалисты.",
+    tk.Label(gate_content, text="Доска объявлений Vkus объединяет тех, кто ищет работу,\\nи тех, кому нужны специалисты.",
              bg="#08152f", fg="#a9badc", justify="center",
              font=("DejaVu Sans", 10)).pack(pady=(10, 24))
     selected_role = {"value": None}
