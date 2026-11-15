@@ -32,16 +32,24 @@ def main():
     app = files[app_path].decode("utf-8")
     marker = "        if 1360 <= x <= 1618 and 373 <= y <= 700:\n"
     hook = (
-        "        if 1372 <= x <= 1607 and 642 <= y <= 688:\n"
+        "        if 1130 <= x <= 1385 and 87 <= y <= 133:\n"
         "            from .exchange_marketplace import open_cloud_marketplace_window\n"
         "            open_cloud_marketplace_window(self.root)\n"
         "            return\n"
     )
     if "open_cloud_marketplace_window(self.root)" not in app:
         if marker not in app:
-            raise SystemExit("Could not locate known Exchange CTA hit-area in Vkus 3.28; refusing a fuzzy patch.")
+            raise SystemExit("Could not locate known Exchange click handler in Vkus 3.28; refusing a fuzzy patch.")
         app = app.replace(marker, hook + marker, 1)
         files[app_path] = app.encode("utf-8")
+    visual_path = "vkus/exchange_visual.py"
+    visual = files[visual_path].decode("utf-8")
+    old_subtitle = '"Находите целевую аудиторию и потенциальных покупателей для любой ниши",\n          18, "#e4eaff", width=980, fit=True)'
+    new_subtitle = '"Находите целевую аудиторию и потенциальных покупателей для любой ниши",\n          18, "#e4eaff", width=800, fit=True)\n    rounded(1130, 87, 1385, 133, "#21104d", "#9c35ff", 12, 1)\n    label(1257, 96, "Доска объявлений", 11, "#f2dfff", "bold", "center", width=230, fit=True)\n    label(1257, 113, "Ищу  ·  Предлагаю", 8, "#c7b0ef", "normal", "center", width=220, fit=True)'
+    if old_subtitle not in visual:
+        raise SystemExit("Could not locate Vkus 3.28 Birzha subtitle; refusing an uncertain visual patch.")
+    visual = visual.replace(old_subtitle, new_subtitle, 1)
+    files[visual_path] = visual.encode("utf-8")
     for target, source in FILES.items():
         files[target] = download(source)
     req = files.get("requirements.txt", b"").decode("utf-8")
