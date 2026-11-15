@@ -130,8 +130,8 @@ def main():
         if old in board:
             board = board.replace(old, new, 1)
     # Keep the card grid visually balanced at every result count.
-    if 'columnspan=2 if len(rows) == 1 else 1' in board:
-        raise SystemExit("Single-card full-width stretch was not removed.")
+    if 'card.configure(width=780, height=178)' not in board:
+        raise SystemExit("Centered single-card layout was not applied.")
     files["vkus/exchange_marketplace.py"] = board.encode("utf-8")
     req = files.get("requirements.txt", b"").decode("utf-8")
     if "keyring" not in req:
