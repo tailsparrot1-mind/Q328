@@ -32,10 +32,10 @@ def main():
     app = files[app_path].decode("utf-8")
     marker = "        if 1360 <= x <= 1618 and 373 <= y <= 700:\n"
     hook = (
-        "        if 1130 <= x <= 1385 and 87 <= y <= 133:\n"
-        "            from .exchange_marketplace import open_cloud_marketplace_window\n"
-        "            open_cloud_marketplace_window(self.root)\n"
-        "            return\n"
+        "        if 1095 <= x <= 1328 and 382 <= y <= 426:\\n"
+        "            from .exchange_marketplace import open_cloud_marketplace_window\\n"
+        "            open_cloud_marketplace_window(self.root)\\n"
+        "            return\\n"
     )
     if "open_cloud_marketplace_window(self.root)" not in app:
         if marker not in app:
@@ -44,20 +44,18 @@ def main():
         files[app_path] = app.encode("utf-8")
     visual_path = "vkus/exchange_visual.py"
     visual = files[visual_path].decode("utf-8")
-    old_subtitle = (
-        '"Находите целевую аудиторию и потенциальных покупателей для любой ниши",\n'
-        '          18, "#e4eaff", width=980, fit=True)'
+    old_button = (
+        '    label(1137, 402, "Расширенный поиск  ⌄", 15, "#38aaff",\\n'
+        '          width=190, fit=True)'
     )
-    new_subtitle = (
-        '"Находите целевую аудиторию и потенциальных покупателей для любой ниши",\n'
-        '          18, "#e4eaff", width=800, fit=True)\n'
-        '    rounded(1130, 87, 1385, 133, "#21104d", "#9c35ff", 12, 1)\n'
-        '    label(1257, 96, "Доска объявлений", 11, "#f2dfff", "bold", "center", width=230, fit=True)\n'
-        '    label(1257, 113, "Ищу  ·  Предлагаю", 8, "#c7b0ef", "normal", "center", width=220, fit=True)'
+    new_button = (
+        '    rounded(1095, 382, 1328, 426, "#21104d", "#9c35ff", 11, 1)\\n'
+        '    label(1211, 390, "Доска объявлений", 11, "#f2dfff", "bold", "center", width=215, fit=True)\\n'
+        '    label(1211, 407, "Ищу  ·  Предлагаю", 8, "#c7b0ef", "normal", "center", width=210, fit=True)'
     )
-    if old_subtitle not in visual:
-        raise SystemExit("Could not locate Vkus 3.28 Birzha subtitle; refusing an uncertain visual patch.")
-    visual = visual.replace(old_subtitle, new_subtitle, 1)
+    if old_button not in visual:
+        raise SystemExit("Could not locate the existing advanced-search label; refusing an uncertain visual patch.")
+    visual = visual.replace(old_button, new_button, 1)
     files[visual_path] = visual.encode("utf-8")
     for target, source in FILES.items():
         files[target] = download(source)
