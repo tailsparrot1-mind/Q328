@@ -134,6 +134,53 @@ def main():
         raise SystemExit("Centered single-card layout was not applied.")
 
     # Second visual pass: richer listing hierarchy and distinct demand/supply cues.
+    # Add the two distinct user paths inside the marketplace window.
+    role_anchor = '    auth_bar = tk.Frame(shell, bg="#0a1731")\n'
+    if role_anchor not in board:
+        raise SystemExit("Could not locate cloud marketplace auth bar for role selector.")
+    role_ui = '''    role_bar = tk.Frame(shell, bg="#07132d")
+    role_bar.pack(fill="x", padx=24, pady=(0, 12))
+    tk.Label(role_bar, text="ВЫБЕРИТЕ СЦЕНАРИЙ", bg="#07132d", fg="#8fa8d8",
+             font=("DejaVu Sans", 8, "bold")).pack(anchor="w", pady=(0, 6))
+    role_buttons = tk.Frame(role_bar, bg="#07132d")
+    role_buttons.pack(fill="x")
+    seeker_btn = tk.Button(role_buttons, text="СОИСКАТЕЛЬ  ·  ИЩУ РАБОТУ",
+             bg="#25134d", fg="#e6c9ff", activebackground="#7136b9",
+             activeforeground="white", relief="flat", bd=0, padx=18, pady=10,
+             font=("DejaVu Sans", 9, "bold"), cursor="hand2")
+    seeker_btn.pack(side="left", fill="x", expand=True, padx=(0, 7))
+    advertiser_btn = tk.Button(role_buttons, text="РЕКЛАМОДАТЕЛЬ  ·  ИЩУ ИСПОЛНИТЕЛЯ",
+             bg="#10344b", fg="#a9eaff", activebackground="#16749a",
+             activeforeground="white", relief="flat", bd=0, padx=18, pady=10,
+             font=("DejaVu Sans", 9, "bold"), cursor="hand2")
+    advertiser_btn.pack(side="left", fill="x", expand=True, padx=(7, 0))
+'''
+    board = board.replace(role_anchor, role_ui + role_anchor, 1)
+    kind_anchor = '    kind_var = tk.StringVar(value="Все типы")\n'
+    role_logic = '''    role_mode = {"value": None}
+    def set_market_role(role):
+        role_mode["value"] = None if role_mode["value"] == role else role
+        kind_var.set("Все типы" if role_mode["value"] is None else
+                     ("Предлагаю" if role_mode["value"] == "Соискатель" else "Ищу"))
+        seeker_active = role_mode["value"] == "Соискатель"
+        advertiser_active = role_mode["value"] == "Рекламодатель"
+        seeker_btn.configure(bg="#7136b9" if seeker_active else "#25134d",
+                             fg="white" if seeker_active else "#e6c9ff")
+        advertiser_btn.configure(bg="#16749a" if advertiser_active else "#10344b",
+                                 fg="white" if advertiser_active else "#a9eaff")
+    seeker_btn.configure(command=lambda: set_market_role("Соискатель"))
+    advertiser_btn.configure(command=lambda: set_market_role("Рекламодатель"))
+'''
+    if kind_anchor not in board:
+        raise SystemExit("Could not locate marketplace kind filter for role behavior.")
+    board = board.replace(kind_anchor, kind_anchor + role_logic, 1)
+    old_kind = '"kind": tk.StringVar(value=(existing or {}).get("kind", "Ищу")),'
+    new_kind = '"kind": tk.StringVar(value=(existing or {}).get("kind", "Предлагаю" if role_mode["value"] == "Соискатель" else "Ищу")),'
+    if old_kind not in board:
+        raise SystemExit("Could not locate listing form kind default.")
+    board = board.replace(old_kind, new_kind, 1)
+    if "СОИСКАТЕЛЬ  ·  ИЩУ РАБОТУ" not in board or "РЕКЛАМОДАТЕЛЬ  ·  ИЩУ ИСПОЛНИТЕЛЯ" not in board:
+        raise SystemExit("Marketplace role selector was not inserted.")
     card_start = board.index('            top = tk.Frame(card, bg="#101f43")')
     card_end = board.index('            def choose(', card_start)
     card_ui = '''            # Slim neon rail makes each listing instantly scannable.
