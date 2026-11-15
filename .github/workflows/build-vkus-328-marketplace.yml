@@ -1,6 +1,11 @@
 name: Vkus 3.28 Marketplace Candidate
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/build_vkus_328_marketplace.py'
+      - '.github/workflows/build-vkus-328-marketplace.yml'
   push:
     branches: [feature/vkus-328-marketplace-board]
     paths:
