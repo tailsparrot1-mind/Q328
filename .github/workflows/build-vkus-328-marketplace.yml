@@ -90,16 +90,14 @@ jobs:
           left = regions["left"]
           gate_canvas.event_generate("<Button-1>", x=int((left[0]+left[2])/2), y=int(left[1]-18))
           app.root.update()
-          assert not [w for w in board.winfo_children() if isinstance(w, tk.Toplevel)], \\
-              "Click outside the visible registration button unexpectedly activated a role"
+          assert not [w for w in board.winfo_children() if isinstance(w, tk.Toplevel)], "Click outside the visible registration button unexpectedly activated a role"
           # Both exact visible button hitboxes must open their own registration flow.
           for side, expected_title in (("left", "Vkus — Соискатель"), ("right", "Vkus — Рекламодатель")):
               bounds = regions[side]
               gate_canvas.event_generate("<Button-1>", x=int((bounds[0]+bounds[2])/2), y=int((bounds[1]+bounds[3])/2))
               app.root.update()
               dialogs = [w for w in board.winfo_children() if isinstance(w, tk.Toplevel)]
-              assert dialogs and dialogs[-1].title() == expected_title, \\
-                  f"{side} button did not open the expected role registration dialog"
+              assert dialogs and dialogs[-1].title() == expected_title, f"{side} button did not open the expected role registration dialog"
               dialogs[-1].destroy()
               app.root.update()
           board.destroy()
