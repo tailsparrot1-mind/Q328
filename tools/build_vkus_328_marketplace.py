@@ -231,6 +231,187 @@ def main():
     board = board.replace('card.configure(width=780, height=178)', 'card.configure(width=780, height=220)', 1)
     board = board.replace('wraplength=760, justify="center").pack(pady=(0, 22))',
         'wraplength=760, justify="center").pack(pady=(0, 18))', 1)
+    # Replace the earlier inline role filter with a full registration gate.
+    board = board.replace(role_ui, "")
+    board = board.replace(role_logic, "")
+    board = board.replace(new_kind, old_kind)
+
+    # Full-window onboarding gate: the noticeboard remains covered until an account
+    # has a persisted marketplace role (Соискатель or Рекламодатель).
+    gate_anchor = '    for variable in (query_var, kind_var, category_var, city_var):\n'
+    gate_patch = '''    # Role selection + registration gate. The underlying board is not visible before auth.
+    gate = tk.Frame(shell, bg="#050d22", highlightbackground="#8a4de0", highlightthickness=1)
+    gate.place(in_=shell, x=0, y=0, relwidth=1, relheight=1)
+    gate_canvas = tk.Canvas(gate, bg="#050d22", highlightthickness=0, bd=0)
+    gate_canvas.place(relwidth=1, relheight=1)
+    gate_canvas.create_oval(-220, -180, 520, 560, fill="#111b49", outline="")
+    gate_canvas.create_oval(760, 260, 1500, 1000, fill="#102d4b", outline="")
+    gate_canvas.create_oval(420, -360, 1100, 320, fill="#15103e", outline="")
+    gate_content = tk.Frame(gate, bg="#08152f", highlightbackground="#344d82",
+                            highlightthickness=1, padx=34, pady=26)
+    gate_content.place(relx=0.5, rely=0.48, anchor="center", width=900, height=650)
+    tk.Label(gate_content, text="VKUS  /  MARKETPLACE", bg="#08152f",
+             fg="#8da8df", font=("DejaVu Sans", 9, "bold")).pack(pady=(2, 10))
+    tk.Label(gate_content, text="НАЙДИТЕ СВОЮ ВОЗМОЖНОСТЬ", bg="#08152f",
+             fg="#f4f0ff", font=("DejaVu Sans", 22, "bold")).pack()
+    tk.Label(gate_content, text="Доска объявлений Vkus объединяет тех, кто ищет работу,\nи тех, кому нужны специалисты.",
+             bg="#08152f", fg="#a9badc", justify="center",
+             font=("DejaVu Sans", 10)).pack(pady=(10, 24))
+    selected_role = {"value": None}
+    role_cards = tk.Frame(gate_content, bg="#08152f")
+    role_cards.pack(fill="x", pady=(0, 18))
+    def choose_gate_role(role):
+        selected_role["value"] = role
+        seeker.configure(bg="#39206b" if role == "Соискатель" else "#111f40",
+                         highlightbackground="#bb7aff" if role == "Соискатель" else "#344d82")
+        advertiser.configure(bg="#123e59" if role == "Рекламодатель" else "#111f40",
+                             highlightbackground="#36c9f1" if role == "Рекламодатель" else "#344d82")
+        role_hint.configure(text=("Выбрано: Соискатель · ищу работу и предлагаю свои навыки"
+                                  if role == "Соискатель" else
+                                  "Выбрано: Рекламодатель · ищу исполнителя для своей задачи"),
+                            fg="#d6c0ff" if role == "Соискатель" else "#9cecff")
+    seeker = tk.Frame(role_cards, bg="#111f40", highlightbackground="#344d82",
+                      highlightthickness=1, padx=20, pady=18, cursor="hand2")
+    seeker.pack(side="left", fill="both", expand=True, padx=(0, 10))
+    advertiser = tk.Frame(role_cards, bg="#111f40", highlightbackground="#344d82",
+                          highlightthickness=1, padx=20, pady=18, cursor="hand2")
+    advertiser.pack(side="left", fill="both", expand=True, padx=(10, 0))
+    tk.Label(seeker, text="↗", bg="#111f40", fg="#c78aff",
+             font=("DejaVu Sans", 27, "bold")).pack(anchor="w")
+    tk.Label(seeker, text="СОИСКАТЕЛЬ", bg="#111f40", fg="#ead8ff",
+             font=("DejaVu Sans", 14, "bold")).pack(anchor="w", pady=(5, 5))
+    tk.Label(seeker, text="Ищу работу  ·  Предлагаю услуги\nПокажите, что умеете, и найдите заказчика.",
+             bg="#111f40", fg="#a9badc", justify="left",
+             font=("DejaVu Sans", 9)).pack(anchor="w")
+    tk.Label(advertiser, text="⌕", bg="#111f40", fg="#35c9ef",
+             font=("DejaVu Sans", 27, "bold")).pack(anchor="w")
+    tk.Label(advertiser, text="РЕКЛАМОДАТЕЛЬ", bg="#111f40", fg="#c5f4ff",
+             font=("DejaVu Sans", 14, "bold")).pack(anchor="w", pady=(5, 5))
+    tk.Label(advertiser, text="Ищу исполнителя  ·  Размещаю задачу\nНайдите специалиста под свою потребность.",
+             bg="#111f40", fg="#a9badc", justify="left",
+             font=("DejaVu Sans", 9)).pack(anchor="w")
+    for widget in (seeker, *seeker.winfo_children()):
+        widget.bind("<Button-1>", lambda _e: choose_gate_role("Соискатель"))
+    for widget in (advertiser, *advertiser.winfo_children()):
+        widget.bind("<Button-1>", lambda _e: choose_gate_role("Рекламодатель"))
+    role_hint = tk.Label(gate_content, text="Сначала выберите, в каком качестве вы хотите пользоваться доской",
+                         bg="#08152f", fg="#8fa8d8", font=("DejaVu Sans", 8))
+    role_hint.pack(pady=(0, 15))
+    credentials = tk.Frame(gate_content, bg="#08152f")
+    credentials.pack(fill="x", padx=90)
+    tk.Label(credentials, text="EMAIL", bg="#08152f", fg="#91a8d7",
+             font=("DejaVu Sans", 8, "bold")).grid(row=0, column=0, sticky="w", pady=(0, 4))
+    gate_email = tk.Entry(credentials, textvariable=email_var, bg="#101f43", fg="#f4f6ff",
+                          insertbackground="white", relief="flat", bd=0,
+                          highlightthickness=1, highlightbackground="#344d82",
+                          font=("DejaVu Sans", 10))
+    gate_email.grid(row=1, column=0, sticky="ew", ipady=9, pady=(0, 12))
+    tk.Label(credentials, text="ПАРОЛЬ  ·  НЕ МЕНЕЕ 8 СИМВОЛОВ", bg="#08152f",
+             fg="#91a8d7", font=("DejaVu Sans", 8, "bold")).grid(row=2, column=0, sticky="w", pady=(0, 4))
+    gate_password = tk.Entry(credentials, textvariable=password_var, show="•",
+                              bg="#101f43", fg="#f4f6ff", insertbackground="white",
+                              relief="flat", bd=0, highlightthickness=1,
+                              highlightbackground="#344d82", font=("DejaVu Sans", 10))
+    gate_password.grid(row=3, column=0, sticky="ew", ipady=9)
+    credentials.grid_columnconfigure(0, weight=1)
+    gate_actions = tk.Frame(gate_content, bg="#08152f")
+    gate_actions.pack(fill="x", padx=90, pady=(16, 0))
+    def complete_gate_registration():
+        if not selected_role["value"]:
+            messagebox.showinfo("Выберите роль", "Сначала выберите Соискателя или Рекламодателя.", parent=win)
+            return
+        try:
+            client.sign_up(email_var.get(), password_var.get(), role=selected_role["value"])
+            if client.is_authenticated:
+                update_account_label()
+                gate.destroy()
+                refresh()
+            else:
+                messagebox.showinfo("Подтверждение email",
+                    "Аккаунт создан. Подтвердите email по ссылке из письма, затем войдите.",
+                    parent=win)
+        except (CloudMarketplaceError, ValueError) as exc:
+            notify_error(exc)
+    def complete_gate_login():
+        try:
+            client.sign_in(email_var.get(), password_var.get())
+            role = (client.session.user.get("user_metadata") or {}).get("marketplace_role")
+            if not role:
+                if not selected_role["value"]:
+                    messagebox.showinfo("Выберите роль",
+                        "Для завершения входа выберите роль: Соискатель или Рекламодатель.", parent=win)
+                    return
+                client.set_marketplace_role(selected_role["value"])
+            update_account_label()
+            gate.destroy()
+            refresh()
+        except (CloudMarketplaceError, ValueError) as exc:
+            notify_error(exc)
+    tk.Button(gate_actions, text="СОЗДАТЬ АККАУНТ И ОТКРЫТЬ ДОСКУ",
+              command=complete_gate_registration, bg="#7136b9", fg="white",
+              activebackground="#9854e8", relief="flat", bd=0, padx=18, pady=11,
+              font=("DejaVu Sans", 9, "bold"), cursor="hand2").pack(fill="x")
+    tk.Button(gate_actions, text="УЖЕ ЕСТЬ АККАУНТ · ВОЙТИ",
+              command=complete_gate_login, bg="#123e59", fg="#d4f7ff",
+              activebackground="#17678a", relief="flat", bd=0, padx=18, pady=9,
+              font=("DejaVu Sans", 8, "bold"), cursor="hand2").pack(fill="x", pady=(8, 0))
+    if client.is_authenticated:
+        saved_role = (client.session.user.get("user_metadata") or {}).get("marketplace_role")
+        if saved_role in ("Соискатель", "Рекламодатель"):
+            gate.destroy()
+        else:
+            update_account_label()
+    gate.lift()
+
+'''
+    if gate_anchor not in board:
+        raise SystemExit("Could not locate final marketplace refresh anchor for registration gate.")
+    board = board.replace(gate_anchor, gate_patch + gate_anchor, 1)
+
+    # Attach the chosen role to Supabase Auth user metadata and restore it on later logins.
+    cloud = files["vkus/cloud_marketplace.py"].decode("utf-8")
+    old_signup = '''    def sign_up(self, email: str, password: str) -> dict:
+        email, password = email.strip(), password
+        if not email or "@" not in email:
+            raise ValueError("Введите корректный email.")
+        if len(password) < 8:
+            raise ValueError("Пароль должен содержать не менее 8 символов.")
+        result = self._request("POST", "/auth/v1/signup",
+                               {"email": email, "password": password})
+        self._accept_auth_result(result)
+        return result or {}
+'''
+    new_signup = '''    def sign_up(self, email: str, password: str, role: str | None = None) -> dict:
+        email, password = email.strip(), password
+        if not email or "@" not in email:
+            raise ValueError("Введите корректный email.")
+        if len(password) < 8:
+            raise ValueError("Пароль должен содержать не менее 8 символов.")
+        if role not in ("Соискатель", "Рекламодатель"):
+            raise ValueError("Выберите роль перед регистрацией.")
+        result = self._request("POST", "/auth/v1/signup",
+                               {"email": email, "password": password,
+                                "data": {"marketplace_role": role}})
+        self._accept_auth_result(result)
+        return result or {}
+
+    def set_marketplace_role(self, role: str) -> dict:
+        if role not in ("Соискатель", "Рекламодатель"):
+            raise ValueError("Неизвестная роль участника доски.")
+        self._require_auth()
+        result = self._request("PUT", "/auth/v1/user",
+                               {"data": {"marketplace_role": role}},
+                               authenticated=True)
+        if isinstance(result, dict):
+            self.session.user.update(result)
+        self.session.user.setdefault("user_metadata", {})["marketplace_role"] = role
+        return result or {}
+'''
+    if old_signup not in cloud:
+        raise SystemExit("Could not locate Supabase sign_up method for role metadata patch.")
+    cloud = cloud.replace(old_signup, new_signup, 1)
+    files["vkus/cloud_marketplace.py"] = cloud.encode("utf-8")
+
     files["vkus/exchange_marketplace.py"] = board.encode("utf-8")
     req = files.get("requirements.txt", b"").decode("utf-8")
     if "keyring" not in req:
