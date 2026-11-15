@@ -54,3 +54,5 @@ jobs:
           fi
           git commit -m "Import verified Vkus 3.28 build and launch evidence"
           git push origin HEAD:main
+
+# Re-trigger import after verifying the source artifact archive.
